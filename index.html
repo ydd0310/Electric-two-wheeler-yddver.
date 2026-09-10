@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>九牛核车型参数与市场概览平台</title>
+    <style>
+        :root {
+            --nine-color: #007BFF;
+            --zeeho-color: #28a745;
+            --niu-color: #FD7E14;
+            --primary: #667eea;
+            --primary-dark: #764ba2;
+            --bg: #f0f2f5;
+            --card-bg: #fff;
+            --text: #333;
+            --text-light: #666;
+            --border: #e8e8e8;
+            --radius: 12px;
+            --shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding-bottom: 80px; }
+        header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: #fff; padding: 32px 20px; text-align: center; position: relative; }
+        header h1 { font-size: 2.2rem; margin-bottom: 6px; letter-spacing: 1px; }
+        header .subtitle { font-size: 1rem; opacity: .88; }
+        .header-actions { position: absolute; top: 16px; right: 20px; display: flex; gap: 8px; align-items: center; }
+        .sync-status { font-size: 12px; padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,0.2); color: #fff; display: flex; align-items: center; gap: 4px; }
+        .sync-status .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .sync-status .dot.green { background: #4caf50; }
+        .sync-status .dot.yellow { background: #ff9800; }
+        .sync-status .dot.red { background: #f44336; }
+        .settings-btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: background .2s; }
+        .settings-btn:hover { background: rgba(255,255,255,0.35); }
+        .container { max-width: 1500px; margin: 0 auto; padding: 0 16px; }
+
+        .filter-bar { background: var(--card-bg); padding: 16px 20px; margin: 16px auto; border-radius: var(--radius); box-shadow: var(--shadow); display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
+        .filter-group { display: flex; flex-direction: column; gap: 4px; }
+        .filter-group label { font-size: 12px; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: .5px; }
+        .filter-group select, .filter-group input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; min-width: 140px; background: #fff; outline: none; transition: border-color .2s; }
+        .filter-group select:focus, .filter-group input:focus { border-color: var(--primary); }
+        .filter-group.series-group { flex: 1; min-width: 200px; }
+        .filter-group.series-group select { width: 100%; }
+
+        .stats-bar { display: flex; gap: 12px; margin: 0 auto 16px; flex-wrap: wrap; }
+        .stat-item { background: var(--card-bg); padding: 12px 20px; border-radius: var(--radius); box-shadow: var(--shadow); flex: 1; min-width: 120px; text-align: center; }
+        .stat-label { display: block; font-size: 12px; color: var(--text-light); }
+        .stat-value { font-size: 22px; font-weight: 700; color: var(--primary); }
+
+        .sort-bar { background: var(--card-bg); padding: 10px 20px; margin: 0 auto 16px; border-radius: var(--radius); box-shadow: var(--shadow); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .sort-bar .sort-label { font-size: 13px; font-weight: 600; color: var(--text-light); white-space: nowrap; }
+        .sort-btn { padding: 5px 14px; border: 1px solid var(--border); border-radius: 20px; background: #fff; font-size: 13px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+        .sort-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .sort-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .sort-btn .arrow { font-size: 10px; margin-left: 2px; }
+
+        .vehicle-list { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin: 0 auto 20px; }
+        .vehicle-card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; transition: transform .2s, box-shadow .2s; border-left: 4px solid #ccc; position: relative; display: flex; flex-direction: column; }
+        .vehicle-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+        .vehicle-card[data-brand="九号"] { border-left-color: var(--nine-color); }
+        .vehicle-card[data-brand="极核"] { border-left-color: var(--zeeho-color); }
+        .vehicle-card[data-brand="小牛"] { border-left-color: var(--niu-color); }
+
+        .card-img-wrap { width: 100%; aspect-ratio: 2 / 1; background: #f5f5f5; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; cursor: pointer; }
+        .card-img-wrap img { width: 100%; height: 100%; object-fit: contain; }
+        .card-img-wrap .img-placeholder { color: #bbb; font-size: 13px; text-align: center; }
+        .card-img-wrap .img-placeholder svg { display: block; margin: 0 auto 6px; }
+        .card-img-wrap .upload-hint { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,.55); color: #fff; font-size: 12px; text-align: center; padding: 4px; opacity: 0; transition: opacity .2s; }
+        .card-img-wrap:hover .upload-hint { opacity: 1; }
+
+        .card-header { padding: 10px 14px 6px; }
+        .card-brand-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+        .card-brand { font-size: 11px; color: var(--text-light); }
+        .card-series-tag { font-size: 10px; padding: 1px 6px; border-radius: 10px; background: #f0f0f0; color: var(--text-light); }
+        .card-name { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+        .card-price { font-size: 18px; color: #e74c3c; font-weight: 700; }
+
+        .card-body { padding: 6px 14px 10px; flex: 1; }
+        .card-info { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 12px; }
+        .card-info .label { color: var(--text-light); }
+        .card-info .value { font-weight: 500; text-align: right; max-width: 60%; }
+        .card-highlights { font-size: 11px; color: #555; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .card-sales { font-size: 11px; color: #27ae60; margin-top: 4px; font-weight: 500; }
+        .card-actions { padding: 0 14px 10px; display: flex; gap: 6px; }
+        .card-actions button { flex: 1; padding: 5px; border: 1px solid var(--border); border-radius: 6px; background: #fff; font-size: 11px; cursor: pointer; transition: all .2s; }
+        .card-actions button:hover { border-color: var(--primary); color: var(--primary); }
+        .card-actions .del-btn:hover { border-color: #e74c3c; color: #e74c3c; }
+        .card-actions .compare-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+        .compare-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 2px solid var(--primary); padding: 12px 20px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; box-shadow: 0 -4px 16px rgba(0,0,0,0.08); z-index: 900; transform: translateY(100%); transition: transform .3s; }
+        .compare-bar.show { transform: translateY(0); }
+        .compare-bar .bar-label { font-size: 13px; color: var(--text-light); font-weight: 600; white-space: nowrap; }
+        .compare-bar .selected-tag { display: flex; align-items: center; gap: 6px; background: #f0f2f5; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }
+        .compare-bar .selected-tag .tag-brand { font-size: 10px; color: var(--text-light); }
+        .compare-bar .selected-tag .remove-tag { cursor: pointer; color: #999; font-weight: bold; margin-left: 4px; font-size: 15px; line-height: 1; }
+        .compare-bar .selected-tag .remove-tag:hover { color: #e74c3c; }
+        .compare-bar .compare-action-btn { padding: 8px 24px; border-radius: 20px; border: none; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .2s; }
+        .compare-bar .compare-action-btn:disabled { background: #ccc; cursor: not-allowed; }
+        .compare-bar .compare-action-btn:not(:disabled):hover { opacity: .9; }
+        .compare-bar .clear-compare-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: #fff; font-size: 13px; cursor: pointer; color: var(--text-light); }
+        .compare-bar .clear-compare-btn:hover { border-color: #e74c3c; color: #e74c3c; }
+
+        .compare-modal-content { max-width: 950px; width: 100%; }
+        .compare-modal-content h2 { font-size: 1.3rem; margin-bottom: 4px; }
+        .compare-modal-content .compare-subtitle { color: var(--text-light); font-size: 13px; margin-bottom: 16px; }
+        .compare-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 500px; }
+        .compare-table th, .compare-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: center; vertical-align: middle; }
+        .compare-table thead th { background: #f8f9fa; color: var(--text); font-weight: 600; position: sticky; top: 0; z-index: 1; }
+        .compare-table thead th:first-child { text-align: left; }
+        .compare-table td:first-child { text-align: left; font-weight: 500; color: var(--text-light); background: #fafafa; white-space: nowrap; }
+        .compare-table tbody tr:hover td { background: #f5f7ff; }
+        .compare-table tbody tr:hover td:first-child { background: #f0f2fa; }
+        .compare-table .diff-val { color: #e74c3c !important; font-weight: 700 !important; }
+        .compare-table .same-val { color: var(--text-light); }
+        .compare-table .vehicle-head { font-size: 14px; }
+        .compare-table .vehicle-head .v-brand { font-size: 11px; color: var(--text-light); display: block; }
+        .compare-table .vehicle-head .v-price { font-size: 15px; color: #e74c3c; font-weight: 700; }
+        .compare-close-btn { display: block; width: 100%; padding: 10px; border: none; border-radius: 8px; background: #f0f0f0; color: var(--text); font-size: 14px; cursor: pointer; margin-top: 16px; }
+        .compare-close-btn:hover { background: #e0e0e0; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.45); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: #fff; border-radius: 16px; width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+        .modal h2 { font-size: 1.3rem; margin-bottom: 4px; }
+        .modal .modal-subtitle { color: var(--text-light); font-size: 13px; margin-bottom: 20px; }
+        .modal .form-row { display: flex; gap: 14px; margin-bottom: 12px; flex-wrap: wrap; }
+        .modal .form-group { flex: 1; min-width: 160px; }
+        .modal .form-group.full { flex: 100%; }
+        .modal .form-group label { display: block; margin-bottom: 3px; font-weight: 500; font-size: 13px; }
+        .modal .form-group input, .modal .form-group select, .modal .form-group textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; outline: none; }
+        .modal .form-group input:focus, .modal .form-group select:focus, .modal .form-group textarea:focus { border-color: var(--primary); }
+        .modal .form-group textarea { resize: vertical; min-height: 50px; }
+        .modal-actions { display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end; }
+        .modal-actions button { padding: 10px 24px; border-radius: 8px; font-size: 14px; cursor: pointer; border: none; transition: opacity .2s; }
+        .modal-actions .save-btn { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; }
+        .modal-actions .cancel-btn { background: #f0f0f0; color: var(--text); }
+        .modal-actions button:hover { opacity: .85; }
+
+        .detail-modal { max-width: 560px; }
+        .detail-modal .detail-img { width: 100%; aspect-ratio: 2/1; background: #f5f5f5; border-radius: 10px; overflow: hidden; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; }
+        .detail-modal .detail-img img { width: 100%; height: 100%; object-fit: contain; }
+        .detail-modal .detail-img .no-img { color: #bbb; font-size: 14px; }
+        .detail-modal .detail-header { margin-bottom: 16px; }
+        .detail-modal .detail-brand { font-size: 12px; color: var(--text-light); }
+        .detail-modal .detail-name { font-size: 1.4rem; font-weight: 700; }
+        .detail-modal .detail-price { font-size: 1.5rem; color: #e74c3c; font-weight: 700; margin-top: 4px; }
+        .detail-modal .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; margin-bottom: 14px; }
+        .detail-modal .detail-item { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; border-bottom: 1px dashed #f0f0f0; }
+        .detail-modal .detail-item .d-label { color: var(--text-light); }
+        .detail-modal .detail-item .d-value { font-weight: 500; text-align: right; }
+        .detail-modal .detail-highlights { background: #f8f9ff; padding: 10px 14px; border-radius: 8px; font-size: 13px; color: #444; line-height: 1.6; margin-bottom: 10px; }
+        .detail-modal .detail-sales { font-size: 13px; color: #27ae60; font-weight: 500; margin-bottom: 10px; }
+        .detail-close-btn { display: block; width: 100%; padding: 10px; border: none; border-radius: 8px; background: #f0f0f0; color: var(--text); font-size: 14px; cursor: pointer; margin-top: 16px; transition: background .2s; }
+        .detail-close-btn:hover { background: #e0e0e0; }
+
+        /* 设置弹窗 */
+        .settings-modal { max-width: 500px; }
+        .settings-modal .tip-box { background: #f0f7ff; border: 1px solid #b3d4fc; border-radius: 8px; padding: 12px 14px; font-size: 12px; color: #333; line-height: 1.6; margin-bottom: 16px; }
+        .settings-modal .tip-box a { color: var(--primary); }
+        .settings-modal .tip-box code { background: #e8e8e8; padding: 1px 4px; border-radius: 3px; font-size: 11px; }
+        .settings-modal .test-result { margin-top: 10px; padding: 8px 12px; border-radius: 6px; font-size: 13px; display: none; }
+        .settings-modal .test-result.success { display: block; background: #e8f5e9; color: #2e7d32; }
+        .settings-modal .test-result.error { display: block; background: #ffebee; color: #c62828; }
+
+        .add-section { background: var(--card-bg); margin: 0 auto 30px; padding: 24px; border-radius: var(--radius); box-shadow: var(--shadow); }
+        .add-section h2 { margin-bottom: 4px; font-size: 1.2rem; }
+        .add-tip { color: var(--text-light); font-size: 13px; margin-bottom: 16px; }
+        .form-row { display: flex; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
+        .form-group { flex: 1; min-width: 180px; }
+        .form-group.full { flex: 100%; }
+        .form-group label { display: block; margin-bottom: 3px; font-weight: 500; font-size: 13px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; outline: none; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); }
+        .form-group textarea { resize: vertical; min-height: 60px; }
+        .form-group .new-series-row { display: flex; gap: 8px; }
+        .form-group .new-series-row input { flex: 1; }
+        .form-group .new-series-row button { padding: 8px 14px; border: none; border-radius: 6px; background: var(--primary); color: #fff; font-size: 13px; cursor: pointer; white-space: nowrap; }
+        .submit-btn { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; border: none; padding: 10px 28px; border-radius: 8px; font-size: 15px; cursor: pointer; transition: opacity .2s; }
+        .submit-btn:hover { opacity: .9; }
+        .img-upload-area { width: 100%; height: 120px; border: 2px dashed var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; transition: border-color .2s; }
+        .img-upload-area:hover { border-color: var(--primary); }
+        .img-upload-area img { width: 100%; height: 100%; object-fit: cover; }
+        .img-upload-area .upload-text { color: #aaa; font-size: 13px; text-align: center; }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-light); grid-column: 1 / -1; }
+        .empty-state svg { margin-bottom: 12px; }
+
+        .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); z-index: 2000; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
+        .loading-overlay.active { display: flex; }
+        .loading-spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-size: 14px; color: var(--text-light); }
+
+        @media (max-width: 1200px) { .vehicle-list { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 1100px) { .vehicle-list { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.5rem; }
+            .header-actions { position: static; justify-content: center; margin-top: 12px; }
+            .filter-bar { flex-direction: column; align-items: stretch; }
+            .filter-group select, .filter-group input { width: 100%; }
+            .vehicle-list { grid-template-columns: repeat(2, 1fr); }
+            .form-row { flex-direction: column; }
+            .sort-bar { overflow-x: auto; flex-wrap: nowrap; }
+            .modal { padding: 20px; }
+            .modal .form-row { flex-direction: column; }
+            .detail-modal .detail-grid { grid-template-columns: 1fr; }
+            .compare-bar { padding: 10px 12px; gap: 8px; }
+            .compare-bar .selected-tag { padding: 4px 8px; font-size: 12px; }
+        }
+        @media (max-width: 480px) { .vehicle-list { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🛵 九牛核车型参数与市场概览平台</h1>
+    <p class="subtitle">覆盖九号、极核、小牛全品牌全系列车型 · 支持多维筛选/排序/编辑/图片管理/车型对比 · 数据云端同步</p>
+    <div class="header-actions">
+        <span class="sync-status" id="syncStatus"><span class="dot red"></span> 未连接</span>
+        <button class="settings-btn" onclick="openSettingsModal()">⚙️ 设置</button>
+    </div>
+</header>
+
+<div class="container">
+    <section class="filter-bar" id="filterBar">
+        <div class="filter-group">
+            <label>品牌</label>
+            <select id="brandFilter"><option value="all">全部品牌</option><option value="九号">九号 Ninebot</option><option value="极核">极核 ZEEHO</option><option value="小牛">小牛 NIU</option></select>
+        </div>
+        <div class="filter-group series-group">
+            <label>系列</label>
+            <select id="seriesFilter"><option value="all">全部系列</option></select>
+        </div>
+        <div class="filter-group">
+            <label>价格区间</label>
+            <select id="priceFilter">
+                <option value="all">全部价格</option>
+                <option value="0-3000">3000元以下（特价/低配）</option>
+                <option value="3000-4000">3000 ~ 4000元</option>
+                <option value="4000-5000">4000 ~ 5000元</option>
+                <option value="5000-7000">5000 ~ 7000元</option>
+                <option value="7000+">7000元以上（高端）</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>车型类型</label>
+            <select id="typeFilter"><option value="all">全部类型</option><option value="电动摩托车">电动摩托车</option><option value="电轻摩">电轻摩</option><option value="新国标电动自行车">新国标电动自行车</option></select>
+        </div>
+        <div class="filter-group">
+            <label>搜索</label>
+            <input type="text" id="searchInput" placeholder="输入车型名称…">
+        </div>
+    </section>
+
+    <section class="stats-bar">
+        <div class="stat-item"><span class="stat-label">总车型数</span><span class="stat-value" id="totalCount">0</span></div>
+        <div class="stat-item"><span class="stat-label">九号</span><span class="stat-value" id="nineCount" style="color:var(--nine-color)">0</span></div>
+        <div class="stat-item"><span class="stat-label">极核</span><span class="stat-value" id="zeehoCount" style="color:var(--zeeho-color)">0</span></div>
+        <div class="stat-item"><span class="stat-label">小牛</span><span class="stat-value" id="niuCount" style="color:var(--niu-color)">0</span></div>
+        <div class="stat-item"><span class="stat-label">当前筛选</span><span class="stat-value" id="filteredCount">0</span></div>
+    </section>
+
+    <section class="sort-bar">
+        <span class="sort-label">排序：</span>
+        <button class="sort-btn active" data-sort="default">默认</button>
+        <button class="sort-btn" data-sort="price-asc">价格 <span class="arrow">↑</span></button>
+        <button class="sort-btn" data-sort="price-desc">价格 <span class="arrow">↓</span></button>
+        <button class="sort-btn" data-sort="power-desc">功率 <span class="arrow">↓</span></button>
+        <button class="sort-btn" data-sort="speed-desc">极速 <span class="arrow">↓</span></button>
+        <button class="sort-btn" data-sort="range-desc">续航 <span class="arrow">↓</span></button>
+    </section>
+
+    <section class="vehicle-list" id="vehicleList"></section>
+
+    <section class="add-section">
+        <h2>➕ 添加新车型</h2>
+        <p class="add-tip">填写车型信息后提交即可添加到列表并同步到云端。新系列名称会自动注册到系列筛选器中。</p>
+        <form id="addForm">
+            <div class="form-row">
+                <div class="form-group"><label>所属品牌</label><select id="addBrand" required><option value="九号">九号</option><option value="极核">极核</option><option value="小牛">小牛</option></select></div>
+                <div class="form-group"><label>车型名称</label><input type="text" id="addName" placeholder="如：MO3 Pro" required></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>所属系列</label><div class="new-series-row"><select id="addSeries"></select><button type="button" id="addNewSeriesBtn" title="添加全新系列">+ 新系列</button></div></div>
+                <div class="form-group"><label>车型类型</label><select id="addType"><option value="电动摩托车">电动摩托车</option><option value="电轻摩">电轻摩</option><option value="新国标电动自行车">新国标电动自行车</option></select></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>售价（元）</label><input type="number" id="addPrice" placeholder="如：5999" required></div>
+                <div class="form-group"><label>额定功率（W）</label><input type="number" id="addRatedPower" placeholder="如：3000"></div>
+                <div class="form-group"><label>峰值功率（W）</label><input type="number" id="addPeakPower" placeholder="如：4680"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>极速（km/h）</label><input type="number" id="addTopSpeed" placeholder="如：80"></div>
+                <div class="form-group"><label>续航里程（km）</label><input type="text" id="addRange" placeholder="如：80 或 80-100"></div>
+                <div class="form-group"><label>电池规格</label><input type="text" id="addBattery" placeholder="如：72V32Ah铅酸"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>轴距（mm）</label><input type="number" id="addWheelbase" placeholder="如：1380"></div>
+                <div class="form-group"><label>刹车类型</label><select id="addBrakeType"><option value="">请选择</option><option value="前后碟刹">前后碟刹</option><option value="前碟后鼓">前碟后鼓</option><option value="前后鼓刹">前后鼓刹</option><option value="前碟后鼓+ABS">前碟后鼓+ABS</option><option value="前后碟刹+ABS">前后碟刹+ABS</option><option value="前后碟刹+ABS+TCS">前后碟刹+ABS+TCS</option></select></div>
+                <div class="form-group"><label>整车尺寸（mm）</label><input type="text" id="addDimensions" placeholder="如：1800×680×1080"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>电机种类</label><select id="addMotorType"><option value="">请选择</option><option value="轮毂电机">轮毂电机</option><option value="中置电机">中置电机</option><option value="轮毂电机（博世）">轮毂电机（博世）</option><option value="中置水冷电机">中置水冷电机</option><option value="侧挂电机">侧挂电机</option></select></div>
+                <div class="form-group"><label>坐高（mm）</label><input type="number" id="addSeatHeight" placeholder="如：760"></div>
+                <div class="form-group"><label>销售情况</label><input type="text" id="addSales" placeholder="如：5000档热门走量款"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>仪表类型</label><select id="addInstrumentType"><option value="">请选择</option><option value="LCD液晶仪表">LCD液晶仪表</option><option value="5寸TFT彩屏">5寸TFT彩屏</option><option value="6.2寸TFT彩屏">6.2寸TFT彩屏</option><option value="6.86寸TFT超宽彩屏">6.86寸TFT超宽彩屏</option><option value="7寸触控屏">7寸触控屏</option><option value="4.3寸TFT屏">4.3寸TFT屏</option><option value="指针仪表">指针仪表</option><option value="LED数码仪表">LED数码仪表</option></select></div>
+                <div class="form-group full"><label>智能化功能</label><input type="text" id="addSmartFeatures" placeholder="如：无感解锁、OTA升级、APP远程控制、导航投屏"></div>
+            </div>
+            <div class="form-group full"><label>核心卖点</label><textarea id="addHighlights" rows="2" placeholder="如：搭载凌波OS系统，支持无感解锁、OTA升级"></textarea></div>
+            <div class="form-group full"><label>车型图片</label><div class="img-upload-area" id="addImgArea"><span class="upload-text">点击或拖拽上传车型图片</span></div><input type="file" id="addImgInput" accept="image/*" style="display:none"></div>
+            <br><button type="submit" class="submit-btn">添加车型</button>
+        </form>
+    </section>
+</div>
+
+<!-- 底部对比栏 -->
+<div class="compare-bar" id="compareBar">
+    <span class="bar-label">🔍 对比栏：</span>
+    <div id="compareTags"></div>
+    <button class="compare-action-btn" id="compareActionBtn" disabled onclick="openCompareModal()">开始对比</button>
+    <button class="clear-compare-btn" onclick="clearCompare()">清空</button>
+</div>
+
+<!-- 对比弹窗 -->
+<div class="modal-overlay" id="compareModal">
+    <div class="modal compare-modal-content" id="compareModalContent"></div>
+</div>
+
+<!-- 编辑弹窗 -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal">
+        <h2>✏️ 编辑车型</h2>
+        <p class="modal-subtitle" id="editSubtitle">修改后点击保存即可更新</p>
+        <form id="editForm">
+            <input type="hidden" id="editId">
+            <div class="form-row">
+                <div class="form-group"><label>所属品牌</label><select id="editBrand" required><option value="九号">九号</option><option value="极核">极核</option><option value="小牛">小牛</option></select></div>
+                <div class="form-group"><label>车型名称</label><input type="text" id="editName" required></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>所属系列</label><select id="editSeries"></select></div>
+                <div class="form-group"><label>车型类型</label><select id="editType"><option value="电动摩托车">电动摩托车</option><option value="电轻摩">电轻摩</option><option value="新国标电动自行车">新国标电动自行车</option></select></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>售价（元）</label><input type="number" id="editPrice" required></div>
+                <div class="form-group"><label>额定功率（W）</label><input type="number" id="editRatedPower"></div>
+                <div class="form-group"><label>峰值功率（W）</label><input type="number" id="editPeakPower"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>极速（km/h）</label><input type="number" id="editTopSpeed"></div>
+                <div class="form-group"><label>续航里程（km）</label><input type="text" id="editRange"></div>
+                <div class="form-group"><label>电池规格</label><input type="text" id="editBattery"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>轴距（mm）</label><input type="number" id="editWheelbase" placeholder="如：1380"></div>
+                <div class="form-group"><label>刹车类型</label><select id="editBrakeType"><option value="">请选择</option><option value="前后碟刹">前后碟刹</option><option value="前碟后鼓">前碟后鼓</option><option value="前后鼓刹">前后鼓刹</option><option value="前碟后鼓+ABS">前碟后鼓+ABS</option><option value="前后碟刹+ABS">前后碟刹+ABS</option><option value="前后碟刹+ABS+TCS">前后碟刹+ABS+TCS</option></select></div>
+                <div class="form-group"><label>整车尺寸（mm）</label><input type="text" id="editDimensions" placeholder="如：1800×680×1080"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>电机种类</label><select id="editMotorType"><option value="">请选择</option><option value="轮毂电机">轮毂电机</option><option value="中置电机">中置电机</option><option value="轮毂电机（博世）">轮毂电机（博世）</option><option value="中置水冷电机">中置水冷电机</option><option value="侧挂电机">侧挂电机</option></select></div>
+                <div class="form-group"><label>坐高（mm）</label><input type="number" id="editSeatHeight" placeholder="如：760"></div>
+                <div class="form-group"><label>销售情况</label><input type="text" id="editSales"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>仪表类型</label><select id="editInstrumentType"><option value="">请选择</option><option value="LCD液晶仪表">LCD液晶仪表</option><option value="5寸TFT彩屏">5寸TFT彩屏</option><option value="6.2寸TFT彩屏">6.2寸TFT彩屏</option><option value="6.86寸TFT超宽彩屏">6.86寸TFT超宽彩屏</option><option value="7寸触控屏">7寸触控屏</option><option value="4.3寸TFT屏">4.3寸TFT屏</option><option value="指针仪表">指针仪表</option><option value="LED数码仪表">LED数码仪表</option></select></div>
+                <div class="form-group full"><label>智能化功能</label><input type="text" id="editSmartFeatures" placeholder="如：无感解锁、OTA升级、APP远程控制、导航投屏"></div>
+            </div>
+            <div class="form-group full"><label>核心卖点</label><textarea id="editHighlights" rows="2"></textarea></div>
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" onclick="closeEditModal()">取消</button>
+                <button type="submit" class="save-btn">保存修改</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 详情弹窗 -->
+<div class="modal-overlay" id="detailModal">
+    <div class="modal detail-modal" id="detailContent"></div>
+</div>
+
+<!-- 设置弹窗 -->
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal settings-modal">
+        <h2>⚙️ GitHub 同步设置</h2>
+        <p class="modal-subtitle">配置 GitHub 仓库信息，实现多人云端数据同步</p>
+        <div class="tip-box">
+            <strong>如何获取 Personal Access Token？</strong><br>
+            1. 打开 <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a><br>
+            2. 点击 <code>Generate new token (classic)</code><br>
+            3. 勾选 <code>repo</code> 权限 → 生成并复制 token<br>
+            4. 粘贴到下方输入框（token 仅保存在你本地浏览器中）
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>GitHub 用户名</label><input type="text" id="settingOwner" placeholder="如：zhangsan"></div>
+            <div class="form-group"><label>仓库名</label><input type="text" id="settingRepo" placeholder="如：jiuniuhe"></div>
+        </div>
+        <div class="form-group full" style="margin-bottom:12px">
+            <label>Personal Access Token</label>
+            <input type="password" id="settingToken" placeholder="ghp_xxxxxxxxxxxx">
+        </div>
+        <div class="test-result" id="testResult"></div>
+        <div class="modal-actions">
+            <button type="button" class="cancel-btn" onclick="closeSettingsModal()">取消</button>
+            <button type="button" class="save-btn" onclick="testConnection()" style="background:#f0f0f0;color:var(--text)">测试连接</button>
+            <button type="button" class="save-btn" onclick="saveSettings()">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 加载中遮罩 -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text" id="loadingText">同步中…</div>
+</div>
+
+<script>
+// ==================== GitHub 配置管理 ====================
+const GITHUB_API = 'https://api.github.com';
+const DATA_FILE = 'data.json';
+let ghConfig = { owner: '', repo: '', token: '' };
+let fileSha = null; // data.json 的 SHA，更新时需要
+
+function loadGhConfig() {
+    try {
+        const saved = localStorage.getItem('ghConfig');
+        if (saved) {
+            ghConfig = JSON.parse(saved);
+            return true;
+        }
+    } catch(e) {}
+    return false;
+}
+
+function saveGhConfig() {
+    localStorage.setItem('ghConfig', JSON.stringify(ghConfig));
+}
+
+function updateSyncStatus(status, text) {
+    const el = document.getElementById('syncStatus');
+    const colors = { connected: 'green', syncing: 'yellow', error: 'red', offline: 'red' };
+    el.innerHTML = `<span class="dot ${colors[status] || 'red'}"></span> ${text}`;
+}
+
+function showLoading(text) {
+    document.getElementById('loadingText').textContent = text || '同步中…';
+    document.getElementById('loadingOverlay').classList.add('active');
+}
+
+function hideLoading() {
+    document.getElementById('loadingOverlay').classList.remove('active');
+}
+
+// ==================== GitHub API 操作 ====================
+async function ghFetchData() {
+    if (!ghConfig.owner || !ghConfig.repo || !ghConfig.token) return null;
+    const url = `${GITHUB_API}/repos/${ghConfig.owner}/${ghConfig.repo}/contents/${DATA_FILE}`;
+    const res = await fetch(url, {
+        headers: {
+            'Authorization': `Bearer ${ghConfig.token}`,
+            'Accept': 'application/vnd.github.v3+json'
+        }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    const data = await res.json();
+    fileSha = data.sha;
+    // GitHub API 返回的 content 是 base64 编码的，需要解码
+    const content = data.content.replace(/\n/g, '');
+    const decoded = decodeURIComponent(escape(atob(content)));
+    return JSON.parse(decoded);
+}
+
+async function ghSaveData(vehiclesData) {
+    if (!ghConfig.owner || !ghConfig.repo || !ghConfig.token) return false;
+    const url = `${GITHUB_API}/repos/${ghConfig.owner}/${ghConfig.repo}/contents/${DATA_FILE}`;
+    // 内容需要先 UTF-8 编码再 Base64 编码（支持中文）
+    const contentStr = JSON.stringify(vehiclesData, null, 2);
+    const base64Content = btoa(unescape(encodeURIComponent(contentStr)));
+
+    const body = {
+        message: `更新车型数据 - ${new Date().toLocaleString('zh-CN')}`,
+        content: base64Content
+    };
+    if (fileSha) body.sha = fileSha;
+
+    const res = await fetch(url, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${ghConfig.token}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    });
+    if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || `HTTP ${res.status}`);
+    }
+    const result = await res.json();
+    fileSha = result.content.sha; // 更新 SHA
+    return true;
+}
+
+// 同步数据到 GitHub（带防抖和乐观更新）
+let syncTimer = null;
+async function syncToGitHub(showMsg) {
+    if (!ghConfig.token) return;
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(async () => {
+        try {
+            updateSyncStatus('syncing', '同步中…');
+            await ghSaveData(vehicles);
+            updateSyncStatus('connected', '已同步');
+            // 同时缓存到 localStorage
+            localStorage.setItem('vehicleDataCache', JSON.stringify(vehicles));
+            if (showMsg) alert('✅ 数据已同步到 GitHub！');
+        } catch(e) {
+            updateSyncStatus('error', '同步失败');
+            console.error('同步失败:', e);
+            if (showMsg) alert('❌ 同步失败: ' + e.message + '\n\n数据已保存在本地，请稍后重试同步。');
+        }
+    }, 500);
+}
+
+// ==================== 设置弹窗 ====================
+function openSettingsModal() {
+    document.getElementById('settingOwner').value = ghConfig.owner || '';
+    document.getElementById('settingRepo').value = ghConfig.repo || '';
+    document.getElementById('settingToken').value = ghConfig.token || '';
+    document.getElementById('testResult').className = 'test-result';
+    document.getElementById('testResult').textContent = '';
+    document.getElementById('settingsModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeSettingsModal() {
+    document.getElementById('settingsModal').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+document.getElementById('settingsModal').addEventListener('click', function(e) {
+    if (e.target === this) closeSettingsModal();
+});
+
+async function testConnection() {
+    const owner = document.getElementById('settingOwner').value.trim();
+    const repo = document.getElementById('settingRepo').value.trim();
+    const token = document.getElementById('settingToken').value.trim();
+    const resultEl = document.getElementById('testResult');
+
+    if (!owner || !repo || !token) {
+        resultEl.className = 'test-result error';
+        resultEl.textContent = '请填写完整信息';
+        return;
+    }
+
+    resultEl.className = 'test-result';
+    resultEl.textContent = '测试中…';
+    resultEl.style.display = 'block';
+
+    try {
+        const url = `${GITHUB_API}/repos/${owner}/${repo}/contents/${DATA_FILE}`;
+        const res = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            const content = data.content.replace(/\n/g, '');
+            const decoded = JSON.parse(decodeURIComponent(escape(atob(content))));
+            resultEl.className = 'test-result success';
+            resultEl.textContent = `✅ 连接成功！找到 ${decoded.length} 款车型数据`;
+        } else if (res.status === 404) {
+            resultEl.className = 'test-result error';
+            resultEl.textContent = '❌ 仓库中未找到 data.json 文件，请先上传';
+        } else {
+            const err = await res.json().catch(() => ({}));
+            resultEl.className = 'test-result error';
+            resultEl.textContent = `❌ 连接失败: ${err.message || res.status}`;
+        }
+    } catch(e) {
+        resultEl.className = 'test-result error';
+        resultEl.textContent = '❌ 网络错误: ' + e.message;
+    }
+}
+
+async function saveSettings() {
+    const owner = document.getElementById('settingOwner').value.trim();
+    const repo = document.getElementById('settingRepo').value.trim();
+    const token = document.getElementById('settingToken').value.trim();
+
+    if (!owner || !repo || !token) {
+        alert('请填写完整信息');
+        return;
+    }
+
+    ghConfig = { owner, repo, token };
+    saveGhConfig();
+    closeSettingsModal();
+
+    // 从 GitHub 拉取最新数据
+    try {
+        showLoading('正在从 GitHub 加载数据…');
+        const data = await ghFetchData();
+        if (data && data.length > 0) {
+            vehicles = data;
+            updateSyncStatus('connected', '已同步');
+            localStorage.setItem('vehicleDataCache', JSON.stringify(vehicles));
+        }
+        hideLoading();
+        refreshSeriesFilters();
+        renderVehicles();
+        alert('✅ 设置已保存，数据已同步！');
+    } catch(e) {
+        hideLoading();
+        updateSyncStatus('error', '加载失败');
+        alert('⚠️ 设置已保存，但从 GitHub 加载数据失败: ' + e.message + '\n\n将使用本地缓存数据。');
+    }
+}
+
+// ==================== 数据层 ====================
+let vehicles = [];
+
+// 默认数据（首次使用或 GitHub 不可用时的后备数据）
+const defaultVehicles = [
+    { id:1, brand:"九号", series:"Q", name:"Q70C", price:2999, type:"新国标电动自行车", ratedPower:400, peakPower:null, topSpeed:25, range:"45", battery:"48V20Ah铅酸", wheelbase:1240, brakeType:"前后鼓刹", dimensions:"1680×650×1040", motorType:"轮毂电机", seatHeight:730, instrumentType:"LED数码仪表", smartFeatures:"APP远程控制", highlights:"入门特价款，轻巧车身，适合短途代步买菜", salesInfo:"3000元以下特价走量款", image:"" },
+    { id:2, brand:"九号", series:"A", name:"A30C", price:2499, type:"新国标电动自行车", ratedPower:400, peakPower:null, topSpeed:25, range:"40", battery:"48V12Ah铅酸", wheelbase:1200, brakeType:"前后鼓刹", dimensions:"1620×640×1020", motorType:"轮毂电机", seatHeight:720, instrumentType:"LED数码仪表", smartFeatures:"APP远程控制", highlights:"最便宜九号，38kg超轻车身，新国标免驾照", salesInfo:"2000元档入门首选", image:"" },
+    { id:3, brand:"九号", series:"V", name:"Vz MIX", price:2899, type:"新国标电动自行车", ratedPower:400, peakPower:null, topSpeed:25, range:"45", battery:"48V12Ah铅酸", wheelbase:1220, brakeType:"前后鼓刹", dimensions:"1650×650×1030", motorType:"轮毂电机", seatHeight:725, instrumentType:"LCD液晶仪表", smartFeatures:"APP远程控制", highlights:"入门踏板造型，经济实用", salesInfo:"入门代步经济款", image:"" },
+    { id:4, brand:"九号", series:"N", name:"N70C", price:3799, type:"电轻摩", ratedPower:1200, peakPower:2000, topSpeed:47, range:"60", battery:"60V20Ah铅酸", wheelbase:1350, brakeType:"前碟后鼓", dimensions:"1780×680×1080", motorType:"轮毂电机", seatHeight:760, instrumentType:"LCD液晶仪表", smartFeatures:"无感解锁、APP远程控制", highlights:"N系列经典入门电摩，580mm长坐垫，422mm踏板，智能解锁", salesInfo:"3000-4000档线下走量主力", image:"" },
+    { id:5, brand:"九号", series:"N", name:"N3 70C 2026", price:3699, type:"电轻摩", ratedPower:1200, peakPower:2200, topSpeed:47, range:"60", battery:"72V22Ah锂电", wheelbase:1350, brakeType:"前后碟刹", dimensions:"1780×680×1080", motorType:"轮毂电机", seatHeight:760, instrumentType:"LCD液晶仪表", smartFeatures:"RideyFUN AIR智能系统、感应解锁3.0、OTA升级", highlights:"2026款N3系列入门，RideyFUN AIR智能系统，感应解锁3.0", salesInfo:"3000-4000档新品，性价比突出", image:"" },
+    { id:6, brand:"九号", series:"N", name:"N85C", price:3699, type:"电轻摩", ratedPower:1500, peakPower:2200, topSpeed:51, range:"75", battery:"72V23Ah铅酸", wheelbase:1380, brakeType:"前后碟刹", dimensions:"1800×690×1090", motorType:"轮毂电机", seatHeight:765, instrumentType:"5寸TFT彩屏", smartFeatures:"无感解锁、APP远程控制、OTA升级", highlights:"5寸TFT彩屏，无感解锁，APP远程控制，0-50km/h加速5.5秒", salesInfo:"3000-4000档高性价比通勤款", image:"" },
+    { id:7, brand:"九号", series:"N", name:"N3 85C", price:4899, type:"电轻摩", ratedPower:1500, peakPower:2500, topSpeed:55, range:"80", battery:"72V24Ah碳晶电池", wheelbase:1380, brakeType:"前后碟刹", dimensions:"1800×690×1090", motorType:"轮毂电机", seatHeight:765, instrumentType:"5寸TFT彩屏", smartFeatures:"无感解锁、APP远程控制、OTA升级", highlights:"碳晶电池长寿命，30L大座桶，前后碟刹", salesInfo:"4000-5000档N系旗舰", image:"" },
+    { id:8, brand:"九号", series:"Q", name:"Q85C", price:4699, type:"电轻摩", ratedPower:1200, peakPower:2000, topSpeed:52, range:"78", battery:"72V23Ah铅酸", wheelbase:1340, brakeType:"前碟后鼓", dimensions:"1750×670×1060", motorType:"轮毂电机", seatHeight:740, instrumentType:"5寸TFT彩屏", smartFeatures:"无感解锁、APP远程控制", highlights:"复古造型高颜值，小巧轻便适合女性，智能解锁", salesInfo:"4000-5000档女性用户首选", image:"" },
+    { id:9, brand:"九号", series:"M", name:"M85C", price:4999, type:"电轻摩", ratedPower:1500, peakPower:2500, topSpeed:55, range:"75", battery:"72V23Ah铅酸", wheelbase:1400, brakeType:"前后碟刹", dimensions:"1830×700×1100", motorType:"轮毂电机", seatHeight:770, instrumentType:"5寸TFT彩屏", smartFeatures:"无感解锁、APP远程控制、OTA升级", highlights:"M系列入门，30L座桶，双人骑行舒适", salesInfo:"4000-5000档M系走量款", image:"" },
+    { id:10, brand:"九号", series:"M", name:"M3 85C MAX闪骑", price:4799, type:"电轻摩", ratedPower:2200, peakPower:3300, topSpeed:60, range:"70", battery:"72V23Ah铅酸", wheelbase:1400, brakeType:"前后碟刹+ABS+TCS", dimensions:"1830×700×1100", motorType:"轮毂电机", seatHeight:770, instrumentType:"5寸TFT彩屏", smartFeatures:"无感解锁、氮气模式、OTA升级、APP远程控制", highlights:"氮气模式加速强劲，ABS+TCS安全配置，5寸TFT仪表", salesInfo:"4000-5000档运动款热门", image:"" },
+    { id:11, brand:"九号", series:"M", name:"M1 85", price:4899, type:"电轻摩", ratedPower:1500, peakPower:2500, topSpeed:55, range:"75", battery:"72V23Ah铅酸", wheelbase:1390, brakeType:"前后碟刹", dimensions:"1820×695×1095", motorType:"轮毂电机", seatHeight:770, instrumentType:"5寸TFT彩屏", smartFeatures:"无感解锁、OTA升级、APP远程控制", highlights:"2026年新品M1系列，都市通勤专业电摩定位", salesInfo:"2026新品首发", image:"" },
+    { id:12, brand:"九号", series:"M", name:"M95C", price:5999, type:"电动摩托车", ratedPower:1500, peakPower:2500, topSpeed:55, range:"107", battery:"72V32Ah铅酸", wheelbase:1420, brakeType:"前后碟刹+ABS", dimensions:"1880×710×1120", motorType:"轮毂电机", seatHeight:775, instrumentType:"5寸TFT彩屏", smartFeatures:"无感解锁、HHC坡道驻车、OTA升级、APP远程控制", highlights:"续航王者，107km超长续航，30L座桶，HHC坡道驻车+TCS", salesInfo:"5000-7000档长续航标杆，外卖骑手首选", image:"" },
+    { id:13, brand:"九号", series:"M", name:"Mz MIX", price:5399, type:"电轻摩", ratedPower:1500, peakPower:2500, topSpeed:55, range:"80", battery:"48V25Ah锂电", wheelbase:1380, brakeType:"前后碟刹", dimensions:"1810×690×1090", motorType:"轮毂电机", seatHeight:770, instrumentType:"5寸TFT彩屏", smartFeatures:"无感解锁、OTA升级、APP远程控制", highlights:"都市时尚车型，锂电轻便，智能配置齐全", salesInfo:"5000-7000档时尚通勤款", image:"" },
+    { id:14, brand:"九号", series:"M", name:"M3 95C", price:6299, type:"电动摩托车", ratedPower:2200, peakPower:3300, topSpeed:65, range:"95", battery:"72V32Ah铅酸", wheelbase:1420, brakeType:"前后碟刹+ABS+TCS", dimensions:"1880×710×1120", motorType:"轮毂电机", seatHeight:775, instrumentType:"5寸TFT彩屏", smartFeatures:"凌波OS系统、无感解锁、OTA升级、APP远程控制", highlights:"M3系列高配，凌波OS系统，ABS+TCS+HHC三重安全", salesInfo:"5000-7000档M系旗舰", image:"" },
+    { id:15, brand:"九号", series:"M", name:"M3 95C MAX闪骑", price:6299, type:"电动摩托车", ratedPower:3000, peakPower:4100, topSpeed:70, range:"85", battery:"72V32Ah铅酸", wheelbase:1420, brakeType:"前后碟刹+ABS+TCS", dimensions:"1880×710×1120", motorType:"轮毂电机", seatHeight:775, instrumentType:"5寸TFT彩屏", smartFeatures:"凌波OS系统、氮气模式、无感解锁、OTA升级", highlights:"氮气模式百米加速4.7秒，阀式双通道ABS，5寸TFT仪表", salesInfo:"6000档旗舰走量款，智能+性能均衡", image:"" },
+    { id:16, brand:"九号", series:"E", name:"E80C MK2", price:6999, type:"电动摩托车", ratedPower:2200, peakPower:3300, topSpeed:65, range:"82", battery:"72V32Ah铅酸", wheelbase:1450, brakeType:"前后碟刹+ABS+TCS", dimensions:"1920×720×1140", motorType:"轮毂电机", seatHeight:780, instrumentType:"5寸TFT彩屏", smartFeatures:"凌波OS系统、无感解锁、OTA升级、APP远程控制", highlights:"E系列入门，搭载凌波OS，支持OTA升级，无感解锁", salesInfo:"7000元档E系入门，智能体验标杆", image:"" },
+    { id:17, brand:"九号", series:"MMAX", name:"MMAX90", price:6999, type:"电动摩托车", ratedPower:2000, peakPower:3500, topSpeed:65, range:"90", battery:"72V32Ah铅酸", wheelbase:1460, brakeType:"前后碟刹+ABS", dimensions:"1930×725×1150", motorType:"轮毂电机", seatHeight:785, instrumentType:"5寸TFT彩屏", smartFeatures:"凌波OS系统、无感解锁、OTA升级", highlights:"机械师系列，运动调校底盘，高性能制动", salesInfo:"7000元档运动玩家选择", image:"" },
+    { id:18, brand:"九号", series:"Fz", name:"Fz5", price:5999, type:"电动摩托车", ratedPower:1500, peakPower:2600, topSpeed:60, range:"100", battery:"48V30Ah锂电", wheelbase:1430, brakeType:"前后碟刹+ABS", dimensions:"1900×715×1130", motorType:"轮毂电机", seatHeight:780, instrumentType:"5寸TFT彩屏", smartFeatures:"凌波OS系统、无感解锁、OTA升级、APP远程控制", highlights:"2026新品城市猎装车型，12寸大轮胎，运动操控", salesInfo:"2026新品，城市猎装定位", image:"" },
+    { id:19, brand:"九号", series:"E", name:"E150 MK2", price:15999, type:"电动摩托车", ratedPower:10000, peakPower:15000, topSpeed:110, range:"120", battery:"72V45Ah锂电", wheelbase:1520, brakeType:"前后碟刹+ABS+TCS", dimensions:"2020×750×1180", motorType:"中置电机", seatHeight:800, instrumentType:"6.2寸TFT彩屏", smartFeatures:"凌波OS系统、无感解锁、OTA升级、导航投屏、APP远程控制", highlights:"高端运动电摩，AXC车架，满配ABS+TCS，高速稳定", salesInfo:"万元级高端性能款", image:"" },
+    { id:20, brand:"九号", series:"E", name:"E300P MK2", price:27999, type:"电动摩托车", ratedPower:20000, peakPower:29000, topSpeed:135, range:"125", battery:"74V28Ah×3锂电", wheelbase:1550, brakeType:"前后碟刹+ABS+TCS", dimensions:"2080×760×1200", motorType:"中置电机", seatHeight:810, instrumentType:"7寸触控屏", smartFeatures:"凌波OS系统、毫米波雷达盲区监测、无感解锁、OTA升级、导航投屏、ACC自适应巡航", highlights:"顶级旗舰，HC420合金钢车架，J.JUAN四活塞卡钳，毫米波雷达盲区监测", salesInfo:"顶级旗舰限量发售", image:"" },
+    { id:21, brand:"九号", series:"M5", name:"M5 200", price:18999, type:"电动摩托车", ratedPower:16000, peakPower:22000, topSpeed:110, range:"195", battery:"72V90Ah锂电", wheelbase:1530, brakeType:"前后碟刹+ABS+TCS", dimensions:"2050×755×1190", motorType:"中置电机", seatHeight:805, instrumentType:"7寸触控屏", smartFeatures:"NimbleOS凌波OS系统、无感解锁、OTA升级、导航投屏、APP远程控制", highlights:"NimbleOS凌波OS系统，AXC车架，续航195km，头号旗舰", salesInfo:"万元级续航旗舰", image:"" },
+    { id:22, brand:"极核", series:"MO", name:"MO2i", price:3299, type:"新国标电动自行车", ratedPower:400, peakPower:null, topSpeed:25, range:"45", battery:"48V12Ah铅酸", wheelbase:1240, brakeType:"前后鼓刹", dimensions:"1660×650×1040", motorType:"轮毂电机", seatHeight:725, instrumentType:"LCD液晶仪表", smartFeatures:"NFC解锁、APP远程控制", highlights:"女性入门新国标电自，幸运四叶草元素，加宽坐垫，陡坡缓降", salesInfo:"3000元档女性入门新系列", image:"" },
+    { id:23, brand:"极核", series:"MO", name:"MO3", price:3699, type:"电轻摩", ratedPower:1100, peakPower:1750, topSpeed:47, range:"55", battery:"60V20Ah铅酸", wheelbase:1320, brakeType:"前碟后鼓", dimensions:"1740×670×1060", motorType:"轮毂电机", seatHeight:745, instrumentType:"LCD液晶仪表", smartFeatures:"NFC解锁、APP远程控制", highlights:"智性出行美学电摩，复古设计，互动萌宠主题，CBS联动刹车", salesInfo:"3000-4000档女性热门新款", image:"" },
+    { id:24, brand:"极核", series:"AE", name:"AE3 Pro", price:3999, type:"电轻摩", ratedPower:1300, peakPower:2450, topSpeed:55, range:"59", battery:"72V23Ah锂电", wheelbase:1360, brakeType:"前后碟刹", dimensions:"1790×685×1085", motorType:"轮毂电机", seatHeight:765, instrumentType:"5寸TFT彩屏", smartFeatures:"NFC解锁、TCS、APP远程控制", highlights:"AE4同款双肩围栏车架，5寸TFT仪表，TCS，NFC解锁", salesInfo:"4000元档入门操控优选", image:"" },
+    { id:25, brand:"极核", series:"AE", name:"AE2 Pro", price:4499, type:"电动摩托车", ratedPower:1500, peakPower:3000, topSpeed:65, range:"75", battery:"72V23Ah铅酸", wheelbase:1370, brakeType:"前后碟刹+TCS", dimensions:"1800×690×1090", motorType:"轮毂电机", seatHeight:770, instrumentType:"5寸TFT彩屏", smartFeatures:"NFC解锁、TCS、APP远程控制", highlights:"城市小钢炮，轻量化车架，5寸全彩仪表，TCS", salesInfo:"4000-5000档动力入门", image:"" },
+    { id:26, brand:"极核", series:"AE", name:"AE4 SE+", price:4899, type:"电动摩托车", ratedPower:1600, peakPower:5620, topSpeed:80, range:"70", battery:"72V23Ah铅酸", wheelbase:1390, brakeType:"前后碟刹+ABS+TCS", dimensions:"1830×700×1100", motorType:"轮毂电机", seatHeight:775, instrumentType:"5寸TFT彩屏", smartFeatures:"NFC解锁、ABS+TCS、APP远程控制", highlights:"峰值功率同级最高5.6kW，标配ABS+TCS，机甲风外观", salesInfo:"5000元档入门性能款，年轻玩家热门", image:"" },
+    { id:27, brand:"极核", series:"AE", name:"AE4 Pro2", price:5699, type:"电动摩托车", ratedPower:1600, peakPower:3500, topSpeed:70, range:"70", battery:"72V23Ah铅酸", wheelbase:1390, brakeType:"前后碟刹+ABS+TCS", dimensions:"1830×700×1100", motorType:"轮毂电机", seatHeight:775, instrumentType:"6.2寸TFT彩屏", smartFeatures:"导航投屏、NFC解锁、eTCS、OTA升级", highlights:"2026款AE4，6.2寸TFT仪表支持导航投屏，标配eTCS", salesInfo:"5000-7000档中端走量", image:"" },
+    { id:28, brand:"极核", series:"AE", name:"AE4 Max2+", price:7499, type:"电动摩托车", ratedPower:3500, peakPower:5620, topSpeed:85, range:"80", battery:"72V32Ah铅酸", wheelbase:1400, brakeType:"前后碟刹+ABS+TCS", dimensions:"1850×710×1110", motorType:"轮毂电机", seatHeight:780, instrumentType:"6.2寸TFT彩屏", smartFeatures:"导航投屏、后向雷达、NFC解锁、OTA升级", highlights:"母线120A相线350A控制器，极速同级最高，后向雷达", salesInfo:"7000元以上性能旗舰", image:"" },
+    { id:29, brand:"极核", series:"AE", name:"AE6 Pro", price:7999, type:"电动摩托车", ratedPower:4000, peakPower:6800, topSpeed:86, range:"69", battery:"72V32Ah铅酸", wheelbase:1420, brakeType:"前后碟刹+ABS+TCS", dimensions:"1890×720×1130", motorType:"轮毂电机", seatHeight:785, instrumentType:"6.2寸TFT彩屏", smartFeatures:"导航投屏、NFC解锁、OTA升级、APP远程控制", highlights:"高阶双肩围栏轻量化车架，前对向四活塞辐射卡钳，ABS+TCS", salesInfo:"8000元档性能进阶", image:"" },
+    { id:30, brand:"极核", series:"AE", name:"AE6 Max", price:12999, type:"电动摩托车", ratedPower:4000, peakPower:6800, topSpeed:90, range:"147", battery:"72V30Ah×2锂电", wheelbase:1430, brakeType:"前后碟刹+ABS+TCS", dimensions:"1900×725×1135", motorType:"轮毂电机", seatHeight:790, instrumentType:"6.2寸TFT彩屏", smartFeatures:"导航投屏、NFC解锁、OTA升级、APP远程控制", highlights:"双锂电长续航147km，90km/h极速，适合长途通勤", salesInfo:"万元级长续航款", image:"" },
+    { id:31, brand:"极核", series:"AE", name:"AE7 Pro", price:14099, type:"电动摩托车", ratedPower:5000, peakPower:9200, topSpeed:97, range:"105", battery:"74V45Ah锂电", wheelbase:1440, brakeType:"前后碟刹+ABS+TCS", dimensions:"1920×730×1140", motorType:"侧挂电机", seatHeight:790, instrumentType:"6.2寸TFT彩屏", smartFeatures:"前后双毫米波雷达、28A快充、导航投屏、OTA升级、ACC自适应巡航", highlights:"行业首款四合一侧挂电驱，前后双毫米波雷达，28A快充30分钟补80%", salesInfo:"万元级科技旗舰", image:"" },
+    { id:32, brand:"极核", series:"AE", name:"AE6 Ultra", price:17999, type:"电动摩托车", ratedPower:9000, peakPower:17500, topSpeed:110, range:"204", battery:"76V100Ah大锂电", wheelbase:1450, brakeType:"前后碟刹+ABS+TCS", dimensions:"1940×740×1150", motorType:"中置电机", seatHeight:795, instrumentType:"6.2寸TFT彩屏", smartFeatures:"毫米波雷达、ACC自适应巡航、导航投屏、OTA升级、APP远程控制", highlights:"76V大锂电续航204km，毫米波雷达+ACC自适应巡航，半热熔胎", salesInfo:"高端性能+超长续航旗舰", image:"" },
+    { id:33, brand:"极核", series:"AE", name:"AE8 S+ MY25", price:23980, type:"电动摩托车", ratedPower:6000, peakPower:15000, topSpeed:110, range:"185", battery:"74V45Ah×2锂电", wheelbase:1460, brakeType:"前后碟刹+ABS+TCS", dimensions:"1960×745×1160", motorType:"中置水冷电机", seatHeight:800, instrumentType:"6.2寸TFT彩屏", smartFeatures:"毫米波雷达、导航投屏、OTA升级、APP远程控制、赛道模式", highlights:"中置水冷电机，CMT焊接车架，马牌皮带传动，0-50km/h加速2.4秒", salesInfo:"极核性能天花板，赛道玩家首选", image:"" },
+    { id:34, brand:"极核", series:"EZ", name:"EZ3", price:3999, type:"电轻摩", ratedPower:1900, peakPower:null, topSpeed:48, range:"70", battery:"60V23Ah铅酸", wheelbase:1340, brakeType:"前碟后鼓", dimensions:"1760×675×1070", motorType:"轮毂电机", seatHeight:755, instrumentType:"LCD液晶仪表", smartFeatures:"APP远程控制", highlights:"都市通勤款，配色丰富，提供电摩/电轻摩双版本", salesInfo:"4000元档通勤实用款", image:"" },
+    { id:35, brand:"小牛", series:"G", name:"G0 40", price:2499, type:"新国标电动自行车", ratedPower:400, peakPower:null, topSpeed:25, range:"40", battery:"48V12Ah铅酸", wheelbase:1200, brakeType:"前后鼓刹", dimensions:"1630×640×1025", motorType:"轮毂电机", seatHeight:720, instrumentType:"LED数码仪表", smartFeatures:"APP远程控制", highlights:"小牛最便宜入门款，轻巧实用", salesInfo:"2000元档学生代步", image:"" },
+    { id:36, brand:"小牛", series:"F", name:"F0 50", price:2899, type:"新国标电动自行车", ratedPower:400, peakPower:null, topSpeed:25, range:"50", battery:"48V12Ah铅酸", wheelbase:1220, brakeType:"前后鼓刹", dimensions:"1650×645×1030", motorType:"轮毂电机", seatHeight:725, instrumentType:"LCD液晶仪表", smartFeatures:"APP远程控制", highlights:"F系列入门，续航50km，日常代步够用", salesInfo:"3000元以下性价比款", image:"" },
+    { id:37, brand:"小牛", series:"N", name:"N One", price:2999, type:"电动摩托车", ratedPower:800, peakPower:1800, topSpeed:47, range:"48", battery:"60V20Ah铅酸", wheelbase:1340, brakeType:"前碟后鼓", dimensions:"1750×670×1065", motorType:"轮毂电机", seatHeight:755, instrumentType:"LCD液晶仪表", smartFeatures:"TCS、APP远程控制", highlights:"经典大牛造型，入门门槛最低，TCS+双碟刹", salesInfo:"3000元档最低门槛电摩", image:"" },
+    { id:38, brand:"小牛", series:"MT", name:"MT Citi", price:3499, type:"新国标电动自行车", ratedPower:400, peakPower:null, topSpeed:25, range:"80", battery:"48V12Ah铅酸", wheelbase:1260, brakeType:"前后鼓刹", dimensions:"1700×660×1050", motorType:"轮毂电机", seatHeight:735, instrumentType:"4.3寸TFT屏", smartFeatures:"OTA升级、APP远程控制", highlights:"2026新品家用通勤电自，大包围设计，4.3寸TFT屏，免驾照", salesInfo:"3000-4000档新国标热门", image:"" },
+    { id:39, brand:"小牛", series:"N", name:"N风驰", price:3999, type:"电动摩托车", ratedPower:2200, peakPower:4060, topSpeed:70, range:"52", battery:"72V20Ah锂电", wheelbase:1380, brakeType:"前后碟刹+TCS", dimensions:"1810×695×1095", motorType:"轮毂电机", seatHeight:770, instrumentType:"5寸TFT彩屏", smartFeatures:"TCS、APP远程控制、换电适配", highlights:"35L座桶，45000坎德拉大灯，双碟刹+TCS，适配换电", salesInfo:"4000元档外卖通勤爆款", image:"" },
+    { id:40, brand:"小牛", series:"N", name:"NX70", price:4199, type:"电轻摩", ratedPower:1500, peakPower:2300, topSpeed:55, range:"65", battery:"72V24Ah铅酸", wheelbase:1370, brakeType:"前后碟刹", dimensions:"1800×690×1090", motorType:"轮毂电机", seatHeight:770, instrumentType:"5寸TFT彩屏", smartFeatures:"APP远程控制、OTA升级", highlights:"TFT真彩屏，前后碟刹，减震系统，均衡配置", salesInfo:"4000-5000档均衡通勤款", image:"" },
+    { id:41, brand:"小牛", series:"NX", name:"NX风速", price:4799, type:"电动摩托车", ratedPower:3000, peakPower:4680, topSpeed:80, range:"54", battery:"72V23Ah铅酸", wheelbase:1400, brakeType:"前后碟刹+ABS+TCS", dimensions:"1850×710×1110", motorType:"轮毂电机", seatHeight:780, instrumentType:"5寸TFT彩屏", smartFeatures:"Boost模式、ABS+TCS、APP远程控制", highlights:"霸王龙车架，40L超大座桶，Boost极速80km/h，0-50加速4.71秒", salesInfo:"5000元档动力+空间王者", image:"" },
+    { id:42, brand:"小牛", series:"FX", name:"FX风速", price:4899, type:"电动摩托车", ratedPower:3000, peakPower:4680, topSpeed:80, range:"54", battery:"72V23Ah铅酸", wheelbase:1390, brakeType:"前后碟刹+ABS+TCS", dimensions:"1840×705×1105", motorType:"轮毂电机", seatHeight:780, instrumentType:"5寸TFT彩屏", smartFeatures:"Boost模式、ABS+TCS、APP远程控制", highlights:"与NX风速同平台，运动造型设计，31L座桶，灵活操控", salesInfo:"5000元档运动风格热门", image:"" },
+    { id:43, brand:"小牛", series:"NX", name:"NX马拉松", price:6499, type:"电动摩托车", ratedPower:1500, peakPower:2600, topSpeed:60, range:"146", battery:"72V50Ah锂电", wheelbase:1410, brakeType:"前后碟刹+ABS", dimensions:"1860×715×1115", motorType:"轮毂电机", seatHeight:780, instrumentType:"5寸TFT彩屏", smartFeatures:"灵犀AIOS系统、AI语音助手、导航、OTA升级", highlights:"灵犀AIOS系统，146km超长续航，5寸TFT导航，百公里零衰减", salesInfo:"5000-7000档续航标杆", image:"" },
+    { id:44, brand:"小牛", series:"NX", name:"NX Pro", price:8899, type:"电动摩托车", ratedPower:3000, peakPower:5000, topSpeed:80, range:"100", battery:"72V35Ah锂电", wheelbase:1420, brakeType:"前后碟刹+ABS+TCS", dimensions:"1880×720×1125", motorType:"轮毂电机", seatHeight:785, instrumentType:"6.2寸TFT彩屏", smartFeatures:"赛福ABS、毫米波雷达、灵犀AIOS系统、导航投屏、OTA升级", highlights:"赛福ABS+毫米波雷达，安全配置拉满，万元内天花板", salesInfo:"7000元以上安全旗舰", image:"" },
+    { id:45, brand:"小牛", series:"FX", name:"FX Pro", price:9999, type:"电动摩托车", ratedPower:2000, peakPower:4320, topSpeed:80, range:"110", battery:"72V42Ah锂电", wheelbase:1410, brakeType:"前后碟刹+ABS+TCS", dimensions:"1870×718×1120", motorType:"轮毂电机", seatHeight:785, instrumentType:"6.2寸TFT彩屏", smartFeatures:"毫米波雷达盲区监测、碰撞预警、8A快充、导航投屏、OTA升级", highlights:"汽车级毫米波雷达盲区监测+碰撞预警，前对向4活塞卡钳，8A快充", salesInfo:"万元级智能安全旗舰", image:"" },
+    { id:46, brand:"小牛", series:"NXT", name:"NXT2 Citi", price:5299, type:"新国标电动自行车", ratedPower:400, peakPower:null, topSpeed:25, range:"57", battery:"48V24Ah锂电", wheelbase:1280, brakeType:"前后碟刹+ABS+TCS", dimensions:"1720×665×1055", motorType:"轮毂电机", seatHeight:740, instrumentType:"7寸触控屏", smartFeatures:"灵犀AIOS系统、AI语音助手、OTA升级、APP远程控制", highlights:"2026年AI旗舰电自，灵犀AIOS系统，AI语音助手，HC420合金钢车架", salesInfo:"5000-7000档AI智能新标杆", image:"" },
+    { id:47, brand:"小牛", series:"NXT", name:"NXT2 Ultra", price:12799, type:"新国标电动自行车", ratedPower:400, peakPower:null, topSpeed:25, range:"115", battery:"48V30Ah锂电", wheelbase:1300, brakeType:"前后碟刹+ABS+TCS", dimensions:"1750×670×1065", motorType:"轮毂电机", seatHeight:745, instrumentType:"7寸触控屏", smartFeatures:"灵犀AIOS系统、毫米波雷达、赛福ABS+TCS、AI语音助手、导航投屏、OTA升级", highlights:"7寸触控屏+毫米波雷达+赛福ABS+TCS，新国标天花板", salesInfo:"万元以上新国标旗舰", image:"" },
+    { id:48, brand:"小牛", series:"NX", name:"NX Ultra", price:19900, type:"电动摩托车", ratedPower:5000, peakPower:16000, topSpeed:115, range:"120", battery:"72V28Ah×2锂电", wheelbase:1440, brakeType:"前后碟刹+ABS+TCS", dimensions:"1920×735×1150", motorType:"中置电机", seatHeight:800, instrumentType:"6.2寸TFT彩屏", smartFeatures:"弹射模式、赛福ABS、毫米波雷达、导航投屏、OTA升级", highlights:"弹射模式极速115km/h，赛福ABS+雷达，性能怪兽", salesInfo:"2万元级性能旗舰", image:"" },
+    { id:49, brand:"小牛", series:"U", name:"U3 Pro", price:4199, type:"新国标电动自行车", ratedPower:400, peakPower:null, topSpeed:25, range:"90", battery:"48V24Ah锂电", wheelbase:1250, brakeType:"前后鼓刹", dimensions:"1680×650×1040", motorType:"轮毂电机", seatHeight:725, instrumentType:"LCD液晶仪表", smartFeatures:"APP远程控制", highlights:"经典小巧造型，52kg轻便，续航90km，女性友好", salesInfo:"4000-5000档经典入门电自", image:"" },
+    { id:50, brand:"小牛", series:"N", name:"NQi GT", price:8999, type:"电动摩托车", ratedPower:3000, peakPower:null, topSpeed:82, range:"160", battery:"60V35Ah×2锂电", wheelbase:1430, brakeType:"前后碟刹+ABS", dimensions:"1900×720×1140", motorType:"轮毂电机（博世）", seatHeight:790, instrumentType:"6.86寸TFT超宽彩屏", smartFeatures:"双电系统、APP远程控制、OTA升级", highlights:"V极电机，6.86寸TFT超宽彩屏，双电系统160km续航，50:50配重", salesInfo:"7000元以上经典高端款", image:"" },
+];
+
+// ==================== 对比功能 ====================
+let compareList = [];
+const MAX_COMPARE = 4;
+
+function toggleCompare(id) {
+    const idx = compareList.indexOf(id);
+    if (idx > -1) { compareList.splice(idx, 1); }
+    else {
+        if (compareList.length >= MAX_COMPARE) { alert(`最多只能同时对比 ${MAX_COMPARE} 款车型！`); return; }
+        compareList.push(id);
+    }
+    renderCompareBar();
+    renderVehicles();
+}
+
+function clearCompare() { compareList = []; renderCompareBar(); renderVehicles(); }
+
+function renderCompareBar() {
+    const bar = document.getElementById('compareBar');
+    const tagsEl = document.getElementById('compareTags');
+    const btn = document.getElementById('compareActionBtn');
+    if (compareList.length === 0) { bar.classList.remove('show'); return; }
+    bar.classList.add('show');
+    tagsEl.innerHTML = compareList.map(id => {
+        const v = vehicles.find(v => v.id === id);
+        if (!v) return '';
+        return `<span class="selected-tag"><span class="tag-brand">${v.brand}</span> ${v.name}<span class="remove-tag" onclick="toggleCompare(${v.id})">×</span></span>`;
+    }).join('');
+    btn.disabled = compareList.length < 2;
+    btn.textContent = compareList.length < 2 ? `再选${2 - compareList.length}款即可对比` : `开始对比（${compareList.length}款）`;
+}
+
+function openCompareModal() {
+    if (compareList.length < 2) return;
+    const list = compareList.map(id => vehicles.find(v => v.id === id)).filter(Boolean);
+    if (list.length < 2) return;
+    const params = [
+        { label: '售价', key: 'price', format: v => '¥' + (v.price || '-').toLocaleString(), raw: v => v.price },
+        { label: '车型类型', key: 'type', format: v => v.type || '-', raw: v => v.type },
+        { label: '额定功率', key: 'ratedPower', format: v => v.ratedPower ? v.ratedPower + 'W' : '-', raw: v => v.ratedPower },
+        { label: '峰值功率', key: 'peakPower', format: v => v.peakPower ? v.peakPower + 'W' : '-', raw: v => v.peakPower },
+        { label: '电机种类', key: 'motorType', format: v => v.motorType || '-', raw: v => v.motorType },
+        { label: '极速', key: 'topSpeed', format: v => v.topSpeed ? v.topSpeed + ' km/h' : '-', raw: v => v.topSpeed },
+        { label: '续航里程', key: 'range', format: v => v.range ? v.range + ' km' : '-', raw: v => v.range },
+        { label: '电池规格', key: 'battery', format: v => v.battery || '-', raw: v => v.battery },
+        { label: '整车尺寸', key: 'dimensions', format: v => v.dimensions || '-', raw: v => v.dimensions },
+        { label: '轴距', key: 'wheelbase', format: v => v.wheelbase ? v.wheelbase + ' mm' : '-', raw: v => v.wheelbase },
+        { label: '坐高', key: 'seatHeight', format: v => v.seatHeight ? v.seatHeight + ' mm' : '-', raw: v => v.seatHeight },
+        { label: '刹车类型', key: 'brakeType', format: v => v.brakeType || '-', raw: v => v.brakeType },
+        { label: '仪表类型', key: 'instrumentType', format: v => v.instrumentType || '-', raw: v => v.instrumentType },
+        { label: '智能化功能', key: 'smartFeatures', format: v => v.smartFeatures || '-', raw: v => v.smartFeatures },
+        { label: '核心卖点', key: 'highlights', format: v => v.highlights || '-', raw: v => v.highlights },
+        { label: '销售定位', key: 'salesInfo', format: v => v.salesInfo || '-', raw: v => v.salesInfo },
+    ];
+    const headerCols = list.map(v => `<th><div class="vehicle-head"><span class="v-brand">${v.brand} · ${v.series}系列</span>${v.name}<div class="v-price">¥${v.price.toLocaleString()}</div></div></th>`).join('');
+    const rows = params.map(p => {
+        const rawVals = list.map(v => p.raw(v));
+        const allSame = rawVals.every(val => val === rawVals[0]);
+        const cells = list.map(v => { const display = p.format(v); const cls = allSame ? 'same-val' : 'diff-val'; return `<td class="${cls}">${display}</td>`; }).join('');
+        return `<tr><td>${p.label}</td>${cells}</tr>`;
+    }).join('');
+    const content = document.getElementById('compareModalContent');
+    content.innerHTML = `<h2>🔍 车型参数对比</h2><p class="compare-subtitle">共 ${list.length} 款车型 · <span style="color:#e74c3c">红色</span> 表示该项参数存在差异</p><div class="compare-table-wrap"><table class="compare-table"><thead><tr><th>参数</th>${headerCols}</tr></thead><tbody>${rows}</tbody></table></div><button class="compare-close-btn" onclick="closeCompareModal()">关闭</button>`;
+    document.getElementById('compareModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeCompareModal() { document.getElementById('compareModal').classList.remove('active'); document.body.style.overflow = ''; }
+document.getElementById('compareModal').addEventListener('click', function(e) { if (e.target === this) closeCompareModal(); });
+
+// ==================== 系列管理 ====================
+let customSeries = [];
+function getAllSeries() {
+    const seriesSet = new Set();
+    vehicles.forEach(v => seriesSet.add(v.series));
+    customSeries.forEach(s => seriesSet.add(s));
+    return Array.from(seriesSet).sort();
+}
+function refreshSeriesFilters() {
+    const allSeries = getAllSeries();
+    const seriesFilter = document.getElementById('seriesFilter');
+    const currentVal = seriesFilter.value;
+    seriesFilter.innerHTML = '<option value="all">全部系列</option>' + allSeries.map(s => `<option value="${s}">${s} 系列</option>`).join('');
+    seriesFilter.value = allSeries.includes(currentVal) ? currentVal : 'all';
+    const addSeries = document.getElementById('addSeries');
+    addSeries.innerHTML = allSeries.map(s => `<option value="${s}">${s} 系列</option>`).join('');
+}
+
+// ==================== 排序 ====================
+let currentSort = 'default';
+function sortVehicles(list) {
+    const sorted = [...list];
+    switch(currentSort) {
+        case 'price-asc': sorted.sort((a,b) => a.price - b.price); break;
+        case 'price-desc': sorted.sort((a,b) => b.price - a.price); break;
+        case 'power-desc': sorted.sort((a,b) => (b.peakPower||b.ratedPower||0) - (a.peakPower||a.ratedPower||0)); break;
+        case 'speed-desc': sorted.sort((a,b) => (b.topSpeed||0) - (a.topSpeed||0)); break;
+        case 'range-desc': sorted.sort((a,b) => { const ra = parseInt(String(a.range).split('-')[0]) || 0; const rb = parseInt(String(b.range).split('-')[0]) || 0; return rb - ra; }); break;
+        default: sorted.sort((a,b) => a.id - b.id);
+    }
+    return sorted;
+}
+
+// ==================== 渲染 ====================
+function getFilteredVehicles() {
+    const brand = document.getElementById('brandFilter').value;
+    const series = document.getElementById('seriesFilter').value;
+    const price = document.getElementById('priceFilter').value;
+    const type = document.getElementById('typeFilter').value;
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    return vehicles.filter(v => {
+        if (brand !== 'all' && v.brand !== brand) return false;
+        if (series !== 'all' && v.series !== series) return false;
+        if (type !== 'all' && v.type !== type) return false;
+        if (search && !v.name.toLowerCase().includes(search) && !v.series.toLowerCase().includes(search)) return false;
+        if (price === '0-3000' && v.price >= 3000) return false;
+        if (price === '3000-4000' && (v.price < 3000 || v.price >= 4000)) return false;
+        if (price === '4000-5000' && (v.price < 4000 || v.price >= 5000)) return false;
+        if (price === '5000-7000' && (v.price < 5000 || v.price >= 7000)) return false;
+        if (price === '7000+' && v.price < 7000) return false;
+        return true;
+    });
+}
+
+function renderVehicles() {
+    let filtered = getFilteredVehicles();
+    filtered = sortVehicles(filtered);
+    const list = document.getElementById('vehicleList');
+    if (filtered.length === 0) {
+        list.innerHTML = `<div class="empty-state"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><p>没有找到匹配的车型，请调整筛选条件</p></div>`;
+    } else {
+        list.innerHTML = filtered.map(v => {
+            const inCompare = compareList.includes(v.id);
+            return `
+            <div class="vehicle-card" data-brand="${v.brand}" data-id="${v.id}">
+                <div class="card-img-wrap" onclick="openDetailModal(${v.id})">
+                    ${v.image ? `<img src="${v.image}" alt="${v.name}">` : `<div class="img-placeholder"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg><div>点击查看详细配置</div></div>`}
+                    <div class="upload-hint">📷 点击查看详情 / 右键上传图片</div>
+                </div>
+                <div class="card-header">
+                    <div class="card-brand-row"><span class="card-brand">${v.brand}</span><span class="card-series-tag">${v.series}系列</span></div>
+                    <div class="card-name">${v.name}</div>
+                    <div class="card-price">¥${v.price.toLocaleString()}</div>
+                </div>
+                <div class="card-body">
+                    <div class="card-info"><span class="label">类型</span><span class="value">${v.type}</span></div>
+                    <div class="card-info"><span class="label">额定/峰值</span><span class="value">${v.ratedPower||'-'}W / ${v.peakPower||'-'}W</span></div>
+                    <div class="card-info"><span class="label">电池</span><span class="value">${v.battery||'-'}</span></div>
+                    ${v.highlights ? `<div class="card-highlights">💡 ${v.highlights}</div>` : ''}
+                    ${v.salesInfo ? `<div class="card-sales">📊 ${v.salesInfo}</div>` : ''}
+                </div>
+                <div class="card-actions">
+                    <button class="compare-btn ${inCompare ? 'active' : ''}" onclick="event.stopPropagation();toggleCompare(${v.id})">${inCompare ? '✓ 已选' : '+ 对比'}</button>
+                    <button onclick="event.stopPropagation();triggerCardImgUpload(${v.id})">📷</button>
+                    <button onclick="event.stopPropagation();openEditModal(${v.id})">✏️</button>
+                    <button class="del-btn" onclick="event.stopPropagation();deleteVehicle(${v.id})">🗑</button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+    document.getElementById('totalCount').textContent = vehicles.length;
+    document.getElementById('nineCount').textContent = vehicles.filter(v => v.brand === '九号').length;
+    document.getElementById('zeehoCount').textContent = vehicles.filter(v => v.brand === '极核').length;
+    document.getElementById('niuCount').textContent = vehicles.filter(v => v.brand === '小牛').length;
+    document.getElementById('filteredCount').textContent = filtered.length;
+}
+
+// ==================== 详情弹窗 ====================
+function openDetailModal(id) {
+    const v = vehicles.find(v => v.id === id);
+    if (!v) return;
+    const content = document.getElementById('detailContent');
+    content.innerHTML = `
+        <div class="detail-img">${v.image ? `<img src="${v.image}" alt="${v.name}">` : `<span class="no-img">暂无图片</span>`}</div>
+        <div class="detail-header">
+            <div class="detail-brand">${v.brand} · ${v.series}系列 · ${v.type}</div>
+            <div class="detail-name">${v.name}</div>
+            <div class="detail-price">¥${v.price.toLocaleString()}</div>
+        </div>
+        <div class="detail-grid">
+            <div class="detail-item"><span class="d-label">额定功率</span><span class="d-value">${v.ratedPower ? v.ratedPower + 'W' : '-'}</span></div>
+            <div class="detail-item"><span class="d-label">峰值功率</span><span class="d-value">${v.peakPower ? v.peakPower + 'W' : '-'}</span></div>
+            <div class="detail-item"><span class="d-label">电机种类</span><span class="d-value">${v.motorType || '-'}</span></div>
+            <div class="detail-item"><span class="d-label">极速</span><span class="d-value">${v.topSpeed ? v.topSpeed + ' km/h' : '-'}</span></div>
+            <div class="detail-item"><span class="d-label">续航里程</span><span class="d-value">${v.range ? v.range + ' km' : '-'}</span></div>
+            <div class="detail-item"><span class="d-label">电池规格</span><span class="d-value">${v.battery || '-'}</span></div>
+            <div class="detail-item"><span class="d-label">整车尺寸</span><span class="d-value">${v.dimensions || '-'}</span></div>
+            <div class="detail-item"><span class="d-label">轴距</span><span class="d-value">${v.wheelbase ? v.wheelbase + ' mm' : '-'}</span></div>
+            <div class="detail-item"><span class="d-label">坐高</span><span class="d-value">${v.seatHeight ? v.seatHeight + ' mm' : '-'}</span></div>
+            <div class="detail-item"><span class="d-label">刹车类型</span><span class="d-value">${v.brakeType || '-'}</span></div>
+            <div class="detail-item"><span class="d-label">仪表类型</span><span class="d-value">${v.instrumentType || '-'}</span></div>
+            <div class="detail-item"><span class="d-label">智能化功能</span><span class="d-value">${v.smartFeatures || '-'}</span></div>
+        </div>
+        ${v.highlights ? `<div class="detail-highlights">💡 ${v.highlights}</div>` : ''}
+        ${v.salesInfo ? `<div class="detail-sales">📊 ${v.salesInfo}</div>` : ''}
+        <button class="detail-close-btn" onclick="closeDetailModal()">关闭</button>`;
+    document.getElementById('detailModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+function closeDetailModal() { document.getElementById('detailModal').classList.remove('active'); document.body.style.overflow = ''; }
+document.getElementById('detailModal').addEventListener('click', function(e) { if (e.target === this) closeDetailModal(); });
+
+// ==================== 编辑弹窗 ====================
+function openEditModal(id) {
+    const v = vehicles.find(v => v.id === id);
+    if (!v) return;
+    document.getElementById('editId').value = v.id;
+    document.getElementById('editBrand').value = v.brand;
+    document.getElementById('editName').value = v.name;
+    document.getElementById('editType').value = v.type;
+    document.getElementById('editPrice').value = v.price;
+    document.getElementById('editRatedPower').value = v.ratedPower || '';
+    document.getElementById('editPeakPower').value = v.peakPower || '';
+    document.getElementById('editTopSpeed').value = v.topSpeed || '';
+    document.getElementById('editRange').value = v.range || '';
+    document.getElementById('editBattery').value = v.battery || '';
+    document.getElementById('editWheelbase').value = v.wheelbase || '';
+    document.getElementById('editBrakeType').value = v.brakeType || '';
+    document.getElementById('editDimensions').value = v.dimensions || '';
+    document.getElementById('editMotorType').value = v.motorType || '';
+    document.getElementById('editSeatHeight').value = v.seatHeight || '';
+    document.getElementById('editInstrumentType').value = v.instrumentType || '';
+    document.getElementById('editSmartFeatures').value = v.smartFeatures || '';
+    document.getElementById('editHighlights').value = v.highlights || '';
+    document.getElementById('editSales').value = v.salesInfo || '';
+    document.getElementById('editSubtitle').textContent = `正在编辑：${v.brand} ${v.name}`;
+    const editSeries = document.getElementById('editSeries');
+    const allSeries = getAllSeries();
+    editSeries.innerHTML = allSeries.map(s => `<option value="${s}" ${s === v.series ? 'selected' : ''}>${s} 系列</option>`).join('');
+    document.getElementById('editModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+function closeEditModal() { document.getElementById('editModal').classList.remove('active'); document.body.style.overflow = ''; }
+
+document.getElementById('editForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const id = parseInt(document.getElementById('editId').value);
+    const v = vehicles.find(v => v.id === id);
+    if (!v) return;
+    v.brand = document.getElementById('editBrand').value;
+    v.name = document.getElementById('editName').value;
+    v.series = document.getElementById('editSeries').value;
+    v.type = document.getElementById('editType').value;
+    v.price = parseInt(document.getElementById('editPrice').value);
+    v.ratedPower = parseInt(document.getElementById('editRatedPower').value) || null;
+    v.peakPower = parseInt(document.getElementById('editPeakPower').value) || null;
+    v.topSpeed = parseInt(document.getElementById('editTopSpeed').value) || null;
+    v.range = document.getElementById('editRange').value || null;
+    v.battery = document.getElementById('editBattery').value || null;
+    v.wheelbase = parseInt(document.getElementById('editWheelbase').value) || null;
+    v.brakeType = document.getElementById('editBrakeType').value || null;
+    v.dimensions = document.getElementById('editDimensions').value || null;
+    v.motorType = document.getElementById('editMotorType').value || null;
+    v.seatHeight = parseInt(document.getElementById('editSeatHeight').value) || null;
+    v.instrumentType = document.getElementById('editInstrumentType').value || null;
+    v.smartFeatures = document.getElementById('editSmartFeatures').value || null;
+    v.highlights = document.getElementById('editHighlights').value || '';
+    v.salesInfo = document.getElementById('editSales').value || '';
+    closeEditModal();
+    refreshSeriesFilters();
+    renderVehicles();
+    renderCompareBar();
+    syncToGitHub(true);
+});
+document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) closeEditModal(); });
+
+// ==================== 交互事件 ====================
+function triggerCardImgUpload(id) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const v = vehicles.find(v => v.id === id);
+                if (v) { v.image = ev.target.result; renderVehicles(); syncToGitHub(false); }
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    input.click();
+}
+
+async function deleteVehicle(id) {
+    if (!confirm('确认删除该车型？')) return;
+    vehicles = vehicles.filter(v => v.id !== id);
+    compareList = compareList.filter(cid => cid !== id);
+    refreshSeriesFilters();
+    renderCompareBar();
+    renderVehicles();
+    syncToGitHub(true);
+}
+
+['brandFilter','seriesFilter','priceFilter','typeFilter'].forEach(id => {
+    document.getElementById(id).addEventListener('change', renderVehicles);
+});
+document.getElementById('searchInput').addEventListener('input', renderVehicles);
+
+document.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentSort = this.dataset.sort;
+        renderVehicles();
+    });
+});
+
+document.getElementById('addNewSeriesBtn').addEventListener('click', function() {
+    const name = prompt('请输入新系列名称（如：MO、NS、FZ 等英文缩写）：');
+    if (name && name.trim()) {
+        const seriesName = name.trim().toUpperCase();
+        if (!customSeries.includes(seriesName) && !getAllSeries().includes(seriesName)) {
+            customSeries.push(seriesName);
+            refreshSeriesFilters();
+            document.getElementById('addSeries').value = seriesName;
+            alert(`新系列「${seriesName}」已添加成功！`);
+        } else { alert(`系列「${seriesName}」已存在！`); }
+    }
+});
+
+let addFormImageData = '';
+const addImgArea = document.getElementById('addImgArea');
+const addImgInput = document.getElementById('addImgInput');
+addImgArea.addEventListener('click', () => addImgInput.click());
+addImgArea.addEventListener('dragover', e => { e.preventDefault(); addImgArea.style.borderColor = 'var(--primary)'; });
+addImgArea.addEventListener('dragleave', () => { addImgArea.style.borderColor = ''; });
+addImgArea.addEventListener('drop', e => {
+    e.preventDefault(); addImgArea.style.borderColor = '';
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) handleAddFormImage(file);
+});
+addImgInput.addEventListener('change', function() { if (this.files[0]) handleAddFormImage(this.files[0]); });
+
+function handleAddFormImage(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        addFormImageData = e.target.result;
+        addImgArea.innerHTML = `<img src="${addFormImageData}" alt="预览">`;
+    };
+    reader.readAsDataURL(file);
+}
+
+document.getElementById('addForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const newId = Math.max(...vehicles.map(v => v.id), 0) + 1;
+    const newVehicle = {
+        id: newId,
+        brand: document.getElementById('addBrand').value,
+        series: document.getElementById('addSeries').value,
+        name: document.getElementById('addName').value,
+        price: parseInt(document.getElementById('addPrice').value),
+        type: document.getElementById('addType').value,
+        ratedPower: parseInt(document.getElementById('addRatedPower').value) || null,
+        peakPower: parseInt(document.getElementById('addPeakPower').value) || null,
+        topSpeed: parseInt(document.getElementById('addTopSpeed').value) || null,
+        range: document.getElementById('addRange').value || null,
+        battery: document.getElementById('addBattery').value || null,
+        wheelbase: parseInt(document.getElementById('addWheelbase').value) || null,
+        brakeType: document.getElementById('addBrakeType').value || null,
+        dimensions: document.getElementById('addDimensions').value || null,
+        motorType: document.getElementById('addMotorType').value || null,
+        seatHeight: parseInt(document.getElementById('addSeatHeight').value) || null,
+        instrumentType: document.getElementById('addInstrumentType').value || null,
+        smartFeatures: document.getElementById('addSmartFeatures').value || null,
+        highlights: document.getElementById('addHighlights').value || '',
+        salesInfo: document.getElementById('addSales').value || '',
+        image: addFormImageData || ''
+    };
+    vehicles.push(newVehicle);
+    addFormImageData = '';
+    refreshSeriesFilters();
+    renderVehicles();
+    this.reset();
+    addImgArea.innerHTML = '<span class="upload-text">点击或拖拽上传车型图片</span>';
+    syncToGitHub(true);
+    document.getElementById('vehicleList').scrollIntoView({ behavior: 'smooth' });
+});
+
+// ==================== 初始化 ====================
+async function init() {
+    const hasConfig = loadGhConfig();
+
+    if (hasConfig && ghConfig.token) {
+        // 尝试从 GitHub 加载数据
+        try {
+            updateSyncStatus('syncing', '加载中…');
+            const data = await ghFetchData();
+            if (data && data.length > 0) {
+                vehicles = data;
+                updateSyncStatus('connected', '已同步');
+            } else {
+                vehicles = [...defaultVehicles];
+                updateSyncStatus('connected', '已加载默认数据');
+            }
+            // 缓存到 localStorage
+            localStorage.setItem('vehicleDataCache', JSON.stringify(vehicles));
+        } catch(e) {
+            console.warn('GitHub 加载失败，使用本地缓存', e);
+            updateSyncStatus('error', '离线模式');
+            // 尝试从 localStorage 缓存加载
+            try {
+                const cached = localStorage.getItem('vehicleDataCache');
+                if (cached) { vehicles = JSON.parse(cached); }
+                else { vehicles = [...defaultVehicles]; }
+            } catch(e2) { vehicles = [...defaultVehicles]; }
+        }
+    } else {
+        // 没有配置 GitHub，使用默认数据
+        try {
+            const cached = localStorage.getItem('vehicleDataCache');
+            if (cached) { vehicles = JSON.parse(cached); updateSyncStatus('offline', '本地模式'); }
+            else { vehicles = [...defaultVehicles]; updateSyncStatus('offline', '未配置'); }
+        } catch(e) { vehicles = [...defaultVehicles]; updateSyncStatus('offline', '未配置'); }
+        // 首次使用，弹出设置提示
+        setTimeout(() => {
+            if (confirm('👋 欢迎使用！\n\n检测到尚未配置 GitHub 同步。\n\n是否现在配置？配置后数据将自动同步到云端，支持多人协作。\n\n（也可以稍后点击右上角「设置」按钮配置）')) {
+                openSettingsModal();
+            }
+        }, 500);
+    }
+
+    refreshSeriesFilters();
+    renderVehicles();
+}
+
+init();
+</script>
+
+</body>
+</html>
