@@ -297,7 +297,14 @@
             </div>
             <div class="form-row">
                 <div class="form-group"><label>轴距（mm）</label><input type="number" id="addWheelbase" placeholder="如：1380"></div>
-                <div class="form-group"><label>刹车类型</label><select id="addBrakeType"><option value="">请选择</option><option value="前后碟刹">前后碟刹</option><option value="前碟后鼓">前碟后鼓</option><option value="前后鼓刹">前后鼓刹</option><option value="前碟后鼓+ABS">前碟后鼓+ABS</option><option value="前后碟刹+ABS">前后碟刹+ABS</option><option value="前后碟刹+ABS+TCS">前后碟刹+ABS+TCS</option></select></div>
+                <div class="form-group"><label>刹车类型</label><input type="text" id="addBrakeType" list="addBrakeTypeList" placeholder="选择或输入刹车类型" required>
+<datalist id="addBrakeTypeList">
+    <option value="前后碟刹">
+    <option value="前碟后鼓">
+    <option value="前后鼓刹">
+    <option value="前后碟刹+双通道ABS">
+    <option value="前后碟刹+TCS">
+</datalist></div>
                 <div class="form-group"><label>整车尺寸（mm）</label><input type="text" id="addDimensions" placeholder="如：1800×680×1080"></div>
             </div>
             <div class="form-row">
