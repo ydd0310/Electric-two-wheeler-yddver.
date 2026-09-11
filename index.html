@@ -152,7 +152,7 @@
         }
         .sort-btn .arrow { font-size: 9px; margin-left: 2px; }
         .vehicle-list {
-            display: grid; grid-template-columns: repeat(4, 1fr);
+            display: grid; grid-template-columns: repeat(5, 1fr);
             gap: 14px; margin: 0 auto 24px;
         }
         .vehicle-card {
@@ -1261,6 +1261,7 @@ function renderVehicles() {
                 </div>
                 <div class="card-actions">
                     <button class="compare-btn ${inCompare ? 'active' : ''}" onclick="event.stopPropagation();toggleCompare(${v.id})">${inCompare ? '✓ 已选' : '+ 对比'}</button>
+                    <button onclick="event.stopPropagation();triggerCardImgUpload(${v.id})" title="上传图片">📷</button>
                                         <button onclick="event.stopPropagation();openEditModal(${v.id})">✏️</button>
                     <button class="del-btn" onclick="event.stopPropagation();deleteVehicle(${v.id})">🗑</button>
                 </div>
@@ -1423,13 +1424,55 @@ addImgArea.addEventListener('drop', e => {
 });
 addImgInput.addEventListener('change', function() { if (this.files[0]) handleAddFormImage(this.files[0]); });
 
-function handleAddFormImage(file) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        addFormImageData = e.target.result;
-        addImgArea.innerHTML = `<img src="${addFormImageData}" alt="预览">`;
-    };
-    reader.readAsDataURL(file);
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+async function uploadImageToGitHub(file) {
+    if (!ghConfig.owner || !ghConfig.repo || !ghConfig.token) {
+        throw new Error('请先在设置中配置 GitHub 仓库信息');
+    }
+    const base64 = await fileToBase64(file);
+    const pureBase64 = base64.split(',')[1];
+    const fileName = 'vehicle_' + Date.now() + '_' + file.name;
+    const filePath = 'images/' + fileName;
+    const url = GITHUB_API + '/repos/' + ghConfig.owner + '/' + ghConfig.repo + '/contents/' + filePath;
+    const res = await fetch(url, {
+        method: 'PUT',
+        headers: {
+            'Authorization': 'Bearer ' + ghConfig.token,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            message: 'Upload vehicle image: ' + fileName,
+            content: pureBase64
+        })
+    });
+    if (!res.ok) {
+        const errData = await res.json().catch(function() { return {}; });
+        throw new Error(errData.message || 'HTTP ' + res.status);
+    }
+    var result = await res.json();
+    return 'https://cdn.jsdelivr.net/gh/' + ghConfig.owner + '/' + ghConfig.repo + '@main/' + filePath;
+}
+
+async function handleAddFormImage(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    addImgArea.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ios-blue);">正在上传图片到 GitHub，请稍候...</div>';
+    try {
+        var imageUrl = await uploadImageToGitHub(file);
+        addFormImageData = imageUrl;
+        addImgArea.innerHTML = '<img src="' + imageUrl + '" alt="预览">';
+    } catch (error) {
+        addImgArea.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ios-red);">上传失败: ' + error.message + '</div>';
+        addFormImageData = '';
+    }
 }
 
 document.getElementById('addForm').addEventListener('submit', async function(e) {
@@ -1467,6 +1510,37 @@ document.getElementById('addForm').addEventListener('submit', async function(e) 
     addImgArea.innerHTML = '<span class="upload-text">点击或拖拽上传车型图片</span>';
     syncToGitHub(true);
     document.getElementById('vehicleList').scrollIntoView({ behavior: 'smooth' });
+});
+
+
+// ==================== 卡片图片上传 ====================
+let currentCardImgUploadId = null;
+
+function triggerCardImgUpload(id) {
+    currentCardImgUploadId = id;
+    document.getElementById('cardImgInput').click();
+}
+
+async function handleCardImgUpload(file) {
+    if (!currentCardImgUploadId || !file) return;
+    try {
+        var imageUrl = await uploadImageToGitHub(file);
+        var v = vehicles.find(function(v) { return v.id === currentCardImgUploadId; });
+        if (v) {
+            v.image = imageUrl;
+            renderVehicles();
+            syncToGitHub(true);
+        }
+    } catch (error) {
+        alert('图片上传失败: ' + error.message);
+    } finally {
+        currentCardImgUploadId = null;
+    }
+}
+
+document.getElementById('cardImgInput').addEventListener('change', function() {
+    if (this.files[0]) handleCardImgUpload(this.files[0]);
+    this.value = ''; // 重置，允许重复上传同一文件
 });
 
 // ==================== 初始化 ====================
@@ -1531,5 +1605,8 @@ async function init() {
 init();
 </script>
 
+
+<!-- 卡片图片上传隐藏 input -->
+<input type="file" id="cardImgInput" accept="image/*" style="display:none">
 </body>
 </html>
