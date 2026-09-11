@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>九牛核车型参数与市场概览平台</title>
+    <title>电动两轮车型参数概览平台</title>
     <style>
         :root {
             --nine-color: #007BFF;
@@ -67,6 +67,8 @@
         .card-img-wrap .img-placeholder svg { display: block; margin: 0 auto 6px; }
         .card-img-wrap .upload-hint { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,.55); color: #fff; font-size: 12px; text-align: center; padding: 4px; opacity: 0; transition: opacity .2s; }
         .card-img-wrap:hover .upload-hint { opacity: 1; }
+        .card-img-wrap .card-img-hint { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,.55); color: #fff; font-size: 12px; text-align: center; padding: 4px; opacity: 0; transition: opacity .2s; }
+        .card-img-wrap:hover .card-img-hint { opacity: 1; }
 
         .card-header { padding: 10px 14px 6px; }
         .card-brand-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
@@ -214,8 +216,8 @@
 <body>
 
 <header>
-    <h1>🛵 九牛核车型参数与市场概览平台</h1>
-    <p class="subtitle">覆盖九号、极核、小牛全品牌全系列车型 · 支持多维筛选/排序/编辑/图片管理/车型对比 · 数据云端同步</p>
+    <h1>🛵电动两轮车型参数概览平台</h1>
+    <p class="subtitle">覆盖九号、极核、小牛全品牌全系列车型 · 支持多维筛选/排序/编辑/图片管理/车型对比 · 数据云端同步，支持增加雅爱台等其他品牌车型</p>
     <div class="header-actions">
         <span class="sync-status" id="syncStatus"><span class="dot red"></span> 未连接</span>
         <button class="settings-btn" onclick="openSettingsModal()">⚙️ 设置</button>
@@ -276,7 +278,7 @@
         <p class="add-tip">填写车型信息后提交即可添加到列表并同步到云端。新系列名称会自动注册到系列筛选器中。</p>
         <form id="addForm">
             <div class="form-row">
-                <div class="form-group"><label>所属品牌</label><select id="addBrand" required><option value="九号">九号</option><option value="极核">极核</option><option value="小牛">小牛</option></select></div>
+                <div class="form-group"><label>所属品牌</label><input list="brandDatalistAdd" id="addBrand" required placeholder="选择或输入品牌名称"><datalist id="brandDatalistAdd"></datalist></div>
                 <div class="form-group"><label>车型名称</label><input type="text" id="addName" placeholder="如：MO3 Pro" required></div>
             </div>
             <div class="form-row">
@@ -336,7 +338,7 @@
         <form id="editForm">
             <input type="hidden" id="editId">
             <div class="form-row">
-                <div class="form-group"><label>所属品牌</label><select id="editBrand" required><option value="九号">九号</option><option value="极核">极核</option><option value="小牛">小牛</option></select></div>
+                <div class="form-group"><label>所属品牌</label><input list="brandDatalistEdit" id="editBrand" required placeholder="选择或输入品牌名称"><datalist id="brandDatalistEdit"></datalist></div>
                 <div class="form-group"><label>车型名称</label><input type="text" id="editName" required></div>
             </div>
             <div class="form-row">
@@ -815,6 +817,7 @@ function updateStats() {
 
 function refreshSeriesFilters() {
     refreshBrandFilter();
+    populateBrandDatalists();
     const allSeries = getAllSeries();
     const seriesFilter = document.getElementById('seriesFilter');
     const currentVal = seriesFilter.value;
@@ -822,6 +825,16 @@ function refreshSeriesFilters() {
     seriesFilter.value = allSeries.includes(currentVal) ? currentVal : 'all';
     const addSeries = document.getElementById('addSeries');
     addSeries.innerHTML = allSeries.map(s => `<option value="${s}">${s} 系列</option>`).join('');
+}
+
+// 动态填充品牌自动完成列表（添加/编辑表单）
+function populateBrandDatalists() {
+    const brands = [...new Set(vehicles.map(v => v.brand))].sort();
+    const addDatalist = document.getElementById('brandDatalistAdd');
+    const editDatalist = document.getElementById('brandDatalistEdit');
+    const options = brands.map(b => '<option value="' + b + '">').join('');
+    if (addDatalist) addDatalist.innerHTML = options;
+    if (editDatalist) editDatalist.innerHTML = options;
 }
 
 // ==================== 排序 ====================
