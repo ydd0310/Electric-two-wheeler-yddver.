@@ -3,221 +3,542 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>电动两轮车型参数概览平台</title>
+    <title>电动两轮车参数概览平台</title>
     <style>
         :root {
-            --nine-color: #007BFF;
-            --zeeho-color: #28a745;
-            --niu-color: #FD7E14;
-            --primary: #667eea;
-            --primary-dark: #764ba2;
-            --bg: #f0f2f5;
-            --card-bg: #fff;
-            --text: #333;
-            --text-light: #666;
-            --border: #e8e8e8;
-            --radius: 12px;
-            --shadow: 0 2px 12px rgba(0,0,0,0.06);
+            --ios-blue: #007AFF;
+            --ios-blue-tint: rgba(0, 122, 255, 0.12);
+            --ios-green: #34C759;
+            --ios-red: #FF3B30;
+            --ios-orange: #FF9500;
+            --ios-yellow: #FFCC00;
+            --ios-purple: #AF52DE;
+            --ios-pink: #FF2D55;
+            --ios-teal: #5AC8FA;
+            --ios-gray: #8E8E93;
+            --ios-gray2: #AEAEB2;
+            --ios-gray3: #C7C7CC;
+            --ios-gray4: #D1D1D6;
+            --ios-gray5: #E5E5EA;
+            --ios-gray6: #F2F2F7;
+            --nine-color: #007AFF;
+            --zeeho-color: #34C759;
+            --niu-color: #FF9500;
+            --bg: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --card-bg-translucent: rgba(255, 255, 255, 0.72);
+            --text: #1C1C1E;
+            --text-secondary: #3A3A3C;
+            --text-light: #8E8E93;
+            --text-muted: #AEAEB2;
+            --separator: rgba(60, 60, 67, 0.12);
+            --border: #E5E5EA;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --radius-full: 9999px;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+            --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 20px rgba(0, 0, 0, 0.08);
+            --blur: blur(20px) saturate(180%);
+            --blur-heavy: blur(30px) saturate(200%);
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding-bottom: 80px; }
-        header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: #fff; padding: 32px 20px; text-align: center; position: relative; }
-        header h1 { font-size: 2.2rem; margin-bottom: 6px; letter-spacing: 1px; }
-        header .subtitle { font-size: 1rem; opacity: .88; }
-        .header-actions { position: absolute; top: 16px; right: 20px; display: flex; gap: 8px; align-items: center; }
-        .sync-status { font-size: 12px; padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,0.2); color: #fff; display: flex; align-items: center; gap: 4px; }
-        .sync-status .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-        .sync-status .dot.green { background: #4caf50; }
-        .sync-status .dot.yellow { background: #ff9800; }
-        .sync-status .dot.red { background: #f44336; }
-        .settings-btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: background .2s; }
-        .settings-btn:hover { background: rgba(255,255,255,0.35); }
-        .container { max-width: 1500px; margin: 0 auto; padding: 0 16px; }
-
-        .filter-bar { background: var(--card-bg); padding: 16px 20px; margin: 16px auto; border-radius: var(--radius); box-shadow: var(--shadow); display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Icons', 'PingFang SC', 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.47;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            padding-bottom: 100px;
+            letter-spacing: -0.01em;
+        }
+        header {
+            background: var(--card-bg-translucent);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            padding: 20px 20px 16px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 0.5px solid var(--separator);
+        }
+        header h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); margin-bottom: 2px; }
+        header .subtitle { font-size: 0.85rem; color: var(--text-light); font-weight: 400; letter-spacing: 0; }
+        .header-actions { position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; align-items: center; }
+        .sync-status {
+            font-size: 0.75rem; padding: 3px 10px; border-radius: var(--radius-full);
+            background: var(--ios-gray6); color: var(--text-light);
+            display: flex; align-items: center; gap: 4px; font-weight: 500;
+        }
+        .sync-status .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+        .sync-status .dot.green { background: var(--ios-green); }
+        .sync-status .dot.yellow { background: var(--ios-orange); }
+        .sync-status .dot.red { background: var(--ios-red); }
+        .settings-btn {
+            background: var(--ios-gray5); border: none; color: var(--ios-blue);
+            padding: 4px 12px; border-radius: var(--radius-full); font-size: 0.8rem;
+            cursor: pointer; transition: all 0.2s ease; font-weight: 500; font-family: inherit;
+        }
+        .settings-btn:hover { background: var(--ios-gray4); }
+        .settings-btn:active { transform: scale(0.96); }
+        .container { max-width: 1440px; margin: 0 auto; padding: 0 16px; }
+        .filter-bar {
+            background: var(--card-bg-translucent);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            padding: 12px 16px; margin: 12px auto;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;
+            border: 0.5px solid var(--separator);
+        }
         .filter-group { display: flex; flex-direction: column; gap: 4px; }
-        .filter-group label { font-size: 12px; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: .5px; }
-        .filter-group select, .filter-group input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; min-width: 140px; background: #fff; outline: none; transition: border-color .2s; }
-        .filter-group select:focus, .filter-group input:focus { border-color: var(--primary); }
-        .filter-group.series-group { flex: 1; min-width:a 200px; }
+        .filter-group label {
+            font-size: 0.7rem; font-weight: 600; color: var(--text-light);
+            text-transform: uppercase; letter-spacing: 0.5px; padding-left: 2px;
+        }
+        .filter-group select, .filter-group input {
+            padding: 7px 12px; border: 0.5px solid var(--border);
+            border-radius: var(--radius-sm); font-size: 0.9rem;
+            min-width: 130px; background: var(--ios-gray6);
+            color: var(--text); outline: none; transition: all 0.2s ease; font-family: inherit;
+        }
+        .filter-group select:focus, .filter-group input:focus {
+            border-color: var(--ios-blue);
+            box-shadow: 0 0 0 3px var(--ios-blue-tint);
+            background: #fff;
+        }
+        .filter-group.series-group { flex: 1; min-width: 200px; }
         .filter-group.series-group select { width: 100%; }
-
-        .stats-bar { display: flex; gap: 12px; margin: 0 auto 16px; flex-wrap: wrap; }
-        .stat-item { background: var(--card-bg); padding: 12px 20px; border-radius: var(--radius); box-shadow: var(--shadow); flex: 1; min-width: 120px; text-align: center; }
-        .stat-label { display: block; font-size: 12px; color: var(--text-light); }
-        .stat-value { font-size: 22px; font-weight: 700; color: var(--primary); }
-
-        .sort-bar { background: var(--card-bg); padding: 10px 20px; margin: 0 auto 16px; border-radius: var(--radius); box-shadow: var(--shadow); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .sort-bar .sort-label { font-size: 13px; font-weight: 600; color: var(--text-light); white-space: nowrap; }
-        .sort-btn { padding: 5px 14px; border: 1px solid var(--border); border-radius: 20px; background: #fff; font-size: 13px; cursor: pointer; transition: all .2s; white-space: nowrap; }
-        .sort-btn:hover { border-color: var(--primary); color: var(--primary); }
-        .sort-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-        .sort-btn .arrow { font-size: 10px; margin-left: 2px; }
-
-        .vehicle-list { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin: 0 auto 20px; }
-        .vehicle-card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; transition: transform .2s, box-shadow .2s; border-left: 4px solid #ccc; position: relative; display: flex; flex-direction: column; }
-        .vehicle-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
-        
-        
-        
-
-        .card-img-wrap { width: 100%; aspect-ratio: 2 / 1; background: #f5f5f5; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; cursor: pointer; }
-        .card-img-wrap img { width: 100%; height: 100%; object-fit: contain; }
-        .card-img-wrap .img-placeholder { color: #bbb; font-size: 13px; text-align: center; }
-        .card-img-wrap .img-placeholder svg { display: block; margin: 0 auto 6px; }
-        .card-img-wrap .upload-hint { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,.55); color: #fff; font-size: 12px; text-align: center; padding: 4px; opacity: 0; transition: opacity .2s; }
+        .stats-bar { display: flex; gap: 8px; margin: 0 auto 12px; flex-wrap: wrap; }
+        .stat-item {
+            background: var(--card-bg); padding: 10px 16px;
+            border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
+            flex: 1; min-width: 100px; text-align: center; border: 0.5px solid var(--separator);
+        }
+        .stat-label {
+            display: block; font-size: 0.7rem; color: var(--text-light);
+            font-weight: 500; text-transform: uppercase; letter-spacing: 0.3px;
+        }
+        .stat-value {
+            font-size: 1.5rem; font-weight: 700; color: var(--ios-blue); line-height: 1.2;
+        }
+        .sort-bar {
+            background: var(--card-bg); padding: 6px 12px; margin: 0 auto 12px;
+            border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
+            display: flex; gap: 4px; align-items: center; flex-wrap: wrap;
+            border: 0.5px solid var(--separator);
+        }
+        .sort-bar .sort-label {
+            font-size: 0.8rem; font-weight: 600; color: var(--text-light);
+            white-space: nowrap; margin-right: 4px;
+        }
+        .sort-btn {
+            padding: 5px 12px; border: none; border-radius: var(--radius-full);
+            background: transparent; font-size: 0.8rem; cursor: pointer;
+            transition: all 0.2s ease; white-space: nowrap;
+            color: var(--text-secondary); font-weight: 500; font-family: inherit;
+        }
+        .sort-btn:hover { background: var(--ios-gray6); }
+        .sort-btn.active {
+            background: var(--ios-blue); color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+        }
+        .sort-btn .arrow { font-size: 9px; margin-left: 2px; }
+        .vehicle-list {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 14px; margin: 0 auto 24px;
+        }
+        .vehicle-card {
+            background: var(--card-bg); border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md); overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative; display: flex; flex-direction: column;
+            border: 0.5px solid var(--separator);
+        }
+        .vehicle-card:hover {
+            transform: translateY(-3px); box-shadow: var(--shadow-lg);
+        }
+        .vehicle-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0;
+            height: 3px; background: var(--brand-color, var(--ios-gray3)); z-index: 2;
+        }
+        .card-img-wrap {
+            width: 100%; aspect-ratio: 16 / 10;
+            background: var(--ios-gray6);
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; position: relative; cursor: pointer;
+        }
+        .card-img-wrap img {
+            width: 100%; height: 100%; object-fit: contain;
+            transition: transform 0.4s ease;
+        }
+        .vehicle-card:hover .card-img-wrap img { transform: scale(1.05); }
+        .card-img-wrap .img-placeholder { color: var(--text-muted); font-size: 0.8rem; text-align: center; }
+        .card-img-wrap .img-placeholder svg { display: block; margin: 0 auto 4px; opacity: 0.5; }
+        .card-img-wrap .upload-hint {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            color: #fff; font-size: 0.72rem; text-align: center; padding: 3px 8px;
+            opacity: 0; transition: opacity 0.2s;
+        }
         .card-img-wrap:hover .upload-hint { opacity: 1; }
-        .card-img-wrap .card-img-hint { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,.55); color: #fff; font-size: 12px; text-align: center; padding: 4px; opacity: 0; transition: opacity .2s; }
+        .card-img-wrap .card-img-hint {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            color: #fff; font-size: 0.72rem; text-align: center; padding: 3px 8px;
+            opacity: 0; transition: opacity 0.2s;
+        }
         .card-img-wrap:hover .card-img-hint { opacity: 1; }
-
-        .card-header { padding: 10px 14px 6px; }
+        .card-header { padding: 10px 14px 4px; }
         .card-brand-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
-        .card-brand { font-size: 11px; color: var(--text-light); }
-        .card-series-tag { font-size: 10px; padding: 1px 6px; border-radius: 10px; background: #f0f0f0; color: var(--text-light); }
-        .card-name { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
-        .card-price { font-size: 18px; color: #e74c3c; font-weight: 700; }
-
-        .card-body { padding: 6px 14px 10px; flex: 1; }
-        .card-info { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 12px; }
-        .card-info .label { color: var(--text-light); }
+        .card-brand {
+            font-size: 0.72rem; color: var(--text-light);
+            font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .card-series-tag {
+            font-size: 0.65rem; padding: 1px 6px;
+            border-radius: var(--radius-full);
+            background: var(--ios-gray6); color: var(--text-light); font-weight: 500;
+        }
+        .card-name {
+            font-size: 1.05rem; font-weight: 700;
+            margin-bottom: 2px; color: var(--text); letter-spacing: -0.01em;
+        }
+        .card-price {
+            font-size: 1.15rem; color: var(--ios-blue);
+            font-weight: 700; letter-spacing: -0.01em;
+        }
+        .card-body { padding: 4px 14px 8px; flex: 1; }
+        .card-info { display: flex; justify-content: space-between; margin-bottom: 2px; font-size: 0.78rem; color: var(--text-secondary); }
+        .card-info .label { color: var(--text-light); font-weight: 500; }
         .card-info .value { font-weight: 500; text-align: right; max-width: 60%; }
-        .card-highlights { font-size: 11px; color: #555; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .card-sales { font-size: 11px; color: #27ae60; margin-top: 4px; font-weight: 500; }
-        .card-actions { padding: 0 14px 10px; display: flex; gap: 6px; }
-        .card-actions button { flex: 1; padding: 5px; border: 1px solid var(--border); border-radius: 6px; background: #fff; font-size: 11px; cursor: pointer; transition: all .2s; }
-        .card-actions button:hover { border-color: var(--primary); color: var(--primary); }
-        .card-actions .del-btn:hover { border-color: #e74c3c; color: #e74c3c; }
-        .card-actions .compare-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-
-        .compare-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 2px solid var(--primary); padding: 12px 20px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; box-shadow: 0 -4px 16px rgba(0,0,0,0.08); z-index: 900; transform: translateY(100%); transition: transform .3s; }
+        .card-highlights {
+            font-size: 0.72rem; color: var(--text-light);
+            margin-top: 6px; padding-top: 6px; border-top: 0.5px dashed var(--border);
+            line-height: 1.4;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .card-sales { font-size: 0.72rem; color: var(--ios-green); margin-top: 4px; font-weight: 500; }
+        .card-actions { padding: 6px 10px 10px; display: flex; gap: 6px; }
+        .card-actions button {
+            flex: 1; padding: 5px 8px; border: none;
+            border-radius: var(--radius-sm); background: var(--ios-gray6);
+            font-size: 0.75rem; cursor: pointer;
+            transition: all 0.2s ease; color: var(--text-secondary);
+            font-weight: 500; font-family: inherit;
+        }
+        .card-actions button:hover { background: var(--ios-gray5); }
+        .card-actions button:active { transform: scale(0.96); }
+        .card-actions .del-btn:hover { background: rgba(255, 59, 48, 0.1); color: var(--ios-red); }
+        .card-actions .compare-btn.active { background: var(--ios-blue); color: #fff; }
+        .compare-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--card-bg-translucent);
+            backdrop-filter: var(--blur-heavy);
+            -webkit-backdrop-filter: var(--blur-heavy);
+            border-top: 0.5px solid var(--separator);
+            padding: 12px 20px;
+            display: flex; align-items: center; justify-content: center;
+            gap: 10px; flex-wrap: wrap;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+            z-index: 900;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
         .compare-bar.show { transform: translateY(0); }
-        .compare-bar .bar-label { font-size: 13px; color: var(--text-light); font-weight: 600; white-space: nowrap; }
-        .compare-bar .selected-tag { display: flex; align-items: center; gap: 6px; background: #f0f2f5; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }
-        .compare-bar .selected-tag .tag-brand { font-size: 10px; color: var(--text-light); }
-        .compare-bar .selected-tag .remove-tag { cursor: pointer; color: #999; font-weight: bold; margin-left: 4px; font-size: 15px; line-height: 1; }
-        .compare-bar .selected-tag .remove-tag:hover { color: #e74c3c; }
-        .compare-bar .compare-action-btn { padding: 8px 24px; border-radius: 20px; border: none; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .2s; }
-        .compare-bar .compare-action-btn:disabled { background: #ccc; cursor: not-allowed; }
-        .compare-bar .compare-action-btn:not(:disabled):hover { opacity: .9; }
-        .compare-bar .clear-compare-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: #fff; font-size: 13px; cursor: pointer; color: var(--text-light); }
-        .compare-bar .clear-compare-btn:hover { border-color: #e74c3c; color: #e74c3c; }
-
-        .compare-modal-content { max-width: 950px; width: 100%; }
-        .compare-modal-content h2 { font-size: 1.3rem; margin-bottom: 4px; }
-        .compare-modal-content .compare-subtitle { color: var(--text-light); font-size: 13px; margin-bottom: 16px; }
-        .compare-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 500px; }
-        .compare-table th, .compare-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: center; vertical-align: middle; }
-        .compare-table thead th { background: #f8f9fa; color: var(--text); font-weight: 600; position: sticky; top: 0; z-index: 1; }
-        .compare-table thead th:first-child { text-align: left; }
-        .compare-table td:first-child { text-align: left; font-weight: 500; color: var(--text-light); background: #fafafa; white-space: nowrap; }
-        .compare-table tbody tr:hover td { background: #f5f7ff; }
-        .compare-table tbody tr:hover td:first-child { background: #f0f2fa; }
-        .compare-table .diff-val { color: #e74c3c !important; font-weight: 700 !important; }
-        .compare-table .same-val { color: var(--text-light); }
-        .compare-table .vehicle-head { font-size: 14px; }
-        .compare-table .vehicle-head .v-brand { font-size: 11px; color: var(--text-light); display: block; }
-        .compare-table .vehicle-head .v-price { font-size: 15px; color: #e74c3c; font-weight: 700; }
-        .compare-close-btn { display: block; width: 100%; padding: 10px; border: none; border-radius: 8px; background: #f0f0f0; color: var(--text); font-size: 14px; cursor: pointer; margin-top: 16px; }
-        .compare-close-btn:hover { background: #e0e0e0; }
-
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.45); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
-        .modal-overlay.active { display: flex; }
-        .modal { background: #fff; border-radius: 16px; width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
-        .modal h2 { font-size: 1.3rem; margin-bottom: 4px; }
-        .modal .modal-subtitle { color: var(--text-light); font-size: 13px; margin-bottom: 20px; }
-        .modal .form-row { display: flex; gap: 14px; margin-bottom: 12px; flex-wrap: wrap; }
-        .modal .form-group { flex: 1; min-width: 160px; }
+        .compare-bar .bar-label { font-size: 0.85rem; color: var(--text-light); font-weight: 600; white-space: nowrap; }
+        .compare-bar .selected-tag {
+            display: flex; align-items: center; gap: 6px;
+            background: var(--ios-gray6); padding: 5px 12px;
+            border-radius: var(--radius-full);
+            font-size: 0.82rem; font-weight: 500; color: var(--text);
+        }
+        .compare-bar .selected-tag .tag-brand { font-size: 0.7rem; color: var(--text-light); }
+        .compare-bar .selected-tag .remove-tag {
+            cursor: pointer; color: var(--text-muted);
+            font-weight: bold; margin-left: 4px;
+            font-size: 1rem; line-height: 1;
+        }
+        .compare-bar .selected-tag .remove-tag:hover { color: var(--ios-red); }
+        .compare-bar .compare-action-btn {
+            padding: 8px 24px; border-radius: var(--radius-full);
+            border: none; background: var(--ios-blue);
+            color: #fff; font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s ease;
+            font-family: inherit; box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+        }
+        .compare-bar .compare-action-btn:disabled {
+            background: var(--ios-gray4); cursor: not-allowed; box-shadow: none;
+        }
+        .compare-bar .compare-action-btn:not(:disabled):hover { background: #0066D6; transform: scale(1.02); }
+        .compare-bar .compare-action-btn:not(:disabled):active { transform: scale(0.98); }
+        .compare-bar .clear-compare-btn {
+            padding: 6px 16px; border-radius: var(--radius-full);
+            border: none; background: transparent;
+            font-size: 0.85rem; cursor: pointer;
+            color: var(--ios-red); font-weight: 500; font-family: inherit;
+        }
+        .compare-bar .clear-compare-btn:hover { background: rgba(255, 59, 48, 0.08); }
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            z-index: 1000; align-items: center; justify-content: center;
+            padding: 20px; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal {
+            background: var(--card-bg); border-radius: var(--radius-xl);
+            width: 100%; max-width: 600px; max-height: 85vh;
+            overflow-y: auto; padding: 24px;
+            box-shadow: var(--shadow-xl);
+            transform: scale(0.95) translateY(10px);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .modal-overlay.active .modal { transform: scale(1) translateY(0); }
+        .modal h2 { font-size: 1.2rem; margin-bottom: 2px; color: var(--text); letter-spacing: -0.01em; }
+        .modal .modal-subtitle { color: var(--text-light); font-size: 0.82rem; margin-bottom: 16px; }
+        .modal .form-row { display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+        .modal .form-group { flex: 1; min-width: 150px; }
         .modal .form-group.full { flex: 100%; }
-        .modal .form-group label { display: block; margin-bottom: 3px; font-weight: 500; font-size: 13px; }
-        .modal .form-group input, .modal .form-group select, .modal .form-group textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; outline: none; }
-        .modal .form-group input:focus, .modal .form-group select:focus, .modal .form-group textarea:focus { border-color: var(--primary); }
+        .modal .form-group label {
+            display: block; margin-bottom: 4px;
+            font-weight: 500; font-size: 0.82rem; color: var(--text-secondary);
+        }
+        .modal .form-group input, .modal .form-group select, .modal .form-group textarea {
+            width: 100%; padding: 8px 12px;
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem; outline: none;
+            background: var(--ios-gray6); color: var(--text);
+            transition: all 0.2s ease; font-family: inherit;
+        }
+        .modal .form-group input:focus, .modal .form-group select:focus, .modal .form-group textarea:focus {
+            border-color: var(--ios-blue);
+            box-shadow: 0 0 0 3px var(--ios-blue-tint);
+            background: #fff;
+        }
         .modal .form-group textarea { resize: vertical; min-height: 50px; }
-        .modal-actions { display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end; }
-        .modal-actions button { padding: 10px 24px; border-radius: 8px; font-size: 14px; cursor: pointer; border: none; transition: opacity .2s; }
-        .modal-actions .save-btn { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; }
-        .modal-actions .cancel-btn { background: #f0f0f0; color: var(--text); }
-        .modal-actions button:hover { opacity: .85; }
-
-        .detail-modal { max-width: 560px; }
-        .detail-modal .detail-img { width: 100%; aspect-ratio: 2/1; background: #f5f5f5; border-radius: 10px; overflow: hidden; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; }
+        .modal-actions { display: flex; gap: 8px; margin-top: 18px; justify-content: flex-end; }
+        .modal-actions button {
+            padding: 8px 22px; border-radius: var(--radius-full);
+            font-size: 0.9rem; cursor: pointer; border: none;
+            transition: all 0.2s ease; font-weight: 500; font-family: inherit;
+        }
+        .modal-actions .save-btn {
+            background: var(--ios-blue); color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
+        }
+        .modal-actions .save-btn:hover { background: #0066D6; }
+        .modal-actions .cancel-btn { background: var(--ios-gray5); color: var(--text-secondary); }
+        .modal-actions .cancel-btn:hover { background: var(--ios-gray4); }
+        .detail-modal { max-width: 520px; }
+        .detail-modal .detail-img {
+            width: 100%; aspect-ratio: 16/10;
+            background: var(--ios-gray6);
+            border-radius: var(--radius-md);
+            overflow: hidden; margin-bottom: 14px;
+            display: flex; align-items: center; justify-content: center;
+        }
         .detail-modal .detail-img img { width: 100%; height: 100%; object-fit: contain; }
-        .detail-modal .detail-img .no-img { color: #bbb; font-size: 14px; }
-        .detail-modal .detail-header { margin-bottom: 16px; }
-        .detail-modal .detail-brand { font-size: 12px; color: var(--text-light); }
-        .detail-modal .detail-name { font-size: 1.4rem; font-weight: 700; }
-        .detail-modal .detail-price { font-size: 1.5rem; color: #e74c3c; font-weight: 700; margin-top: 4px; }
-        .detail-modal .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; margin-bottom: 14px; }
-        .detail-modal .detail-item { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; border-bottom: 1px dashed #f0f0f0; }
+        .detail-modal .detail-img .no-img { color: var(--text-muted); font-size: 0.9rem; }
+        .detail-modal .detail-header { margin-bottom: 14px; }
+        .detail-modal .detail-brand {
+            font-size: 0.75rem; color: var(--text-light);
+            font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .detail-modal .detail-name {
+            font-size: 1.4rem; font-weight: 700;
+            color: var(--text); letter-spacing: -0.02em;
+        }
+        .detail-modal .detail-price {
+            font-size: 1.4rem; color: var(--ios-blue);
+            font-weight: 700; margin-top: 2px;
+        }
+        .detail-modal .detail-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 2px 16px; margin-bottom: 14px;
+        }
+        .detail-modal .detail-item {
+            display: flex; justify-content: space-between;
+            font-size: 0.82rem; padding: 6px 0;
+            border-bottom: 0.5px solid var(--separator);
+        }
         .detail-modal .detail-item .d-label { color: var(--text-light); }
-        .detail-modal .detail-item .d-value { font-weight: 500; text-align: right; }
-        .detail-modal .detail-highlights { background: #f8f9ff; padding: 10px 14px; border-radius: 8px; font-size: 13px; color: #444; line-height: 1.6; margin-bottom: 10px; }
-        .detail-modal .detail-sales { font-size: 13px; color: #27ae60; font-weight: 500; margin-bottom: 10px; }
-        .detail-close-btn { display: block; width: 100%; padding: 10px; border: none; border-radius: 8px; background: #f0f0f0; color: var(--text); font-size: 14px; cursor: pointer; margin-top: 16px; transition: background .2s; }
-        .detail-close-btn:hover { background: #e0e0e0; }
-
-        /* 设置弹窗 */
-        .settings-modal { max-width: 500px; }
-        .settings-modal .tip-box { background: #f0f7ff; border: 1px solid #b3d4fc; border-radius: 8px; padding: 12px 14px; font-size: 12px; color: #333; line-height: 1.6; margin-bottom: 16px; }
-        .settings-modal .tip-box a { color: var(--primary); }
-        .settings-modal .tip-box code { background: #e8e8e8; padding: 1px 4px; border-radius: 3px; font-size: 11px; }
-        .settings-modal .test-result { margin-top: 10px; padding: 8px 12px; border-radius: 6px; font-size: 13px; display: none; }
-        .settings-modal .test-result.success { display: block; background: #e8f5e9; color: #2e7d32; }
-        .settings-modal .test-result.error { display: block; background: #ffebee; color: #c62828; }
-
-        .add-section { background: var(--card-bg); margin: 0 auto 30px; padding: 24px; border-radius: var(--radius); box-shadow: var(--shadow); }
-        .add-section h2 { margin-bottom: 4px; font-size: 1.2rem; }
-        .add-tip { color: var(--text-light); font-size: 13px; margin-bottom: 16px; }
-        .form-row { display: flex; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
-        .form-group { flex: 1; min-width: 180px; }
+        .detail-modal .detail-item .d-value { font-weight: 500; text-align: right; color: var(--text); }
+        .detail-modal .detail-highlights {
+            background: var(--ios-gray6); padding: 10px 14px;
+            border-radius: var(--radius-md);
+            font-size: 0.82rem; color: var(--text-secondary);
+            line-height: 1.5; margin-bottom: 10px;
+        }
+        .detail-modal .detail-sales {
+            font-size: 0.82rem; color: var(--ios-green);
+            font-weight: 500; margin-bottom: 10px;
+        }
+        .detail-close-btn {
+            display: block; width: 100%; padding: 10px;
+            border: none; border-radius: var(--radius-md);
+            background: var(--ios-gray5); color: var(--text);
+            font-size: 0.9rem; cursor: pointer;
+            margin-top: 14px; transition: background 0.2s;
+            font-weight: 500; font-family: inherit;
+        }
+        .detail-close-btn:hover { background: var(--ios-gray4); }
+        .settings-modal { max-width: 480px; }
+        .settings-modal .tip-box {
+            background: var(--ios-blue-tint); border: none;
+            border-radius: var(--radius-md); padding: 10px 14px;
+            font-size: 0.78rem; color: var(--text);
+            line-height: 1.5; margin-bottom: 14px;
+        }
+        .settings-modal .tip-box a { color: var(--ios-blue); }
+        .settings-modal .tip-box code {
+            background: var(--ios-gray5);
+            padding: 1px 5px; border-radius: 4px; font-size: 0.72rem;
+        }
+        .settings-modal .test-result { margin-top: 10px; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 0.82rem; display: none; }
+        .settings-modal .test-result.success { display: block; background: rgba(52, 199, 89, 0.12); color: #248A3D; }
+        .settings-modal .test-result.error { display: block; background: rgba(255, 59, 48, 0.12); color: #C62828; }
+        .add-section {
+            background: var(--card-bg); margin: 0 auto 30px;
+            padding: 22px; border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm); border: 0.5px solid var(--separator);
+        }
+        .add-section h2 { font-size: 1.15rem; color: var(--text); letter-spacing: -0.01em; margin-bottom: 4px; }
+        .add-tip { color: var(--text-light); font-size: 0.8rem; margin-bottom: 14px; }
+        .form-row { display: flex; gap: 14px; margin-bottom: 10px; flex-wrap: wrap; }
+        .form-group { flex: 1; min-width: 170px; }
         .form-group.full { flex: 100%; }
-        .form-group label { display: block; margin-bottom: 3px; font-weight: 500; font-size: 13px; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; outline: none; }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); }
+        .form-group label {
+            display: block; margin-bottom: 4px;
+            font-weight: 500; font-size: 0.82rem; color: var(--text-secondary);
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 8px 12px;
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem; outline: none;
+            background: var(--ios-gray6); color: var(--text);
+            transition: all 0.2s ease; font-family: inherit;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--ios-blue);
+            box-shadow: 0 0 0 3px var(--ios-blue-tint);
+            background: #fff;
+        }
         .form-group textarea { resize: vertical; min-height: 60px; }
         .form-group .new-series-row { display: flex; gap: 8px; }
         .form-group .new-series-row input { flex: 1; }
-        .form-group .new-series-row button { padding: 8px 14px; border: none; border-radius: 6px; background: var(--primary); color: #fff; font-size: 13px; cursor: pointer; white-space: nowrap; }
-        .submit-btn { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; border: none; padding: 10px 28px; border-radius: 8px; font-size: 15px; cursor: pointer; transition: opacity .2s; }
-        .submit-btn:hover { opacity: .9; }
-        .img-upload-area { width: 100%; height: 120px; border: 2px dashed var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; transition: border-color .2s; }
-        .img-upload-area:hover { border-color: var(--primary); }
+        .form-group .new-series-row button {
+            padding: 7px 14px; border: none;
+            border-radius: var(--radius-sm);
+            background: var(--ios-blue); color: #fff;
+            font-size: 0.82rem; cursor: pointer;
+            white-space: nowrap; font-weight: 500;
+            font-family: inherit; transition: all 0.2s;
+        }
+        .form-group .new-series-row button:hover { background: #0066D6; }
+        .submit-btn {
+            background: var(--ios-blue); color: #fff;
+            border: none; padding: 10px 28px;
+            border-radius: var(--radius-full);
+            font-size: 0.95rem; cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600; font-family: inherit;
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+        }
+        .submit-btn:hover { background: #0066D6; transform: scale(1.02); }
+        .submit-btn:active { transform: scale(0.98); }
+        .img-upload-area {
+            width: 100%; height: 110px;
+            border: 1.5px dashed var(--border);
+            border-radius: var(--radius-md);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; position: relative; overflow: hidden;
+            transition: all 0.2s; background: var(--ios-gray6);
+        }
+        .img-upload-area:hover { border-color: var(--ios-blue); background: var(--ios-blue-tint); }
         .img-upload-area img { width: 100%; height: 100%; object-fit: cover; }
-        .img-upload-area .upload-text { color: #aaa; font-size: 13px; text-align: center; }
-
+        .img-upload-area .upload-text { color: var(--text-muted); font-size: 0.82rem; text-align: center; }
         .empty-state { text-align: center; padding: 60px 20px; color: var(--text-light); grid-column: 1 / -1; }
-        .empty-state svg { margin-bottom: 12px; }
-
-        .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); z-index: 2000; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
+        .empty-state svg { margin-bottom: 12px; opacity: 0.4; }
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            z-index: 2000; display: none;
+            align-items: center; justify-content: center;
+            flex-direction: column; gap: 12px;
+        }
         .loading-overlay.active { display: flex; }
-        .loading-spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .loading-spinner {
+            width: 36px; height: 36px;
+            border: 3px solid var(--ios-gray5);
+            border-top-color: var(--ios-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .loading-text { font-size: 14px; color: var(--text-light); }
-
-        @media (max-width: 1200px) { .vehicle-list { grid-template-columns: repeat(4, 1fr); } }
-        @media (max-width: 1100px) { .vehicle-list { grid-template-columns: repeat(3, 1fr); } }
+        .loading-text { font-size: 0.9rem; color: var(--text-light); font-weight: 500; }
+        .compare-modal-content { max-width: 900px; }
+        .compare-modal-content h2 { font-size: 1.2rem; }
+        .compare-modal-content .compare-subtitle { color: var(--text-light); font-size: 0.82rem; margin-bottom: 14px; }
+        .compare-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .compare-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 500px; }
+        .compare-table th, .compare-table td { padding: 9px 12px; border-bottom: 0.5px solid var(--separator); text-align: center; vertical-align: middle; }
+        .compare-table thead th { background: var(--ios-gray6); color: var(--text); font-weight: 600; position: sticky; top: 0; z-index: 1; }
+        .compare-table thead th:first-child { text-align: left; }
+        .compare-table td:first-child { text-align: left; font-weight: 500; color: var(--text-light); background: var(--ios-gray6); white-space: nowrap; }
+        .compare-table tbody tr:hover td { background: rgba(0, 122, 255, 0.04); }
+        .compare-table tbody tr:hover td:first-child { background: rgba(0, 122, 255, 0.08); }
+        .compare-table .diff-val { color: var(--ios-red) !important; font-weight: 700 !important; }
+        .compare-table .same-val { color: var(--text-light); }
+        .compare-table .vehicle-head { font-size: 0.9rem; }
+        .compare-table .vehicle-head .v-brand { font-size: 0.72rem; color: var(--text-light); display: block; }
+        .compare-table .vehicle-head .v-price { font-size: 1rem; color: var(--ios-blue); font-weight: 700; }
+        .compare-close-btn {
+            display: block; width: 100%; padding: 10px;
+            border: none; border-radius: var(--radius-md);
+            background: var(--ios-gray5); color: var(--text);
+            font-size: 0.9rem; cursor: pointer;
+            margin-top: 14px; font-weight: 500;
+            font-family: inherit; transition: background 0.2s;
+        }
+        .compare-close-btn:hover { background: var(--ios-gray4); }
+        @media (max-width: 1200px) { .vehicle-list { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 900px) { .vehicle-list { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 768px) {
             header h1 { font-size: 1.5rem; }
-            .header-actions { position: static; justify-content: center; margin-top: 12px; }
+            .header-actions { position: static; justify-content: center; margin-top: 10px; }
             .filter-bar { flex-direction: column; align-items: stretch; }
             .filter-group select, .filter-group input { width: 100%; }
-            .vehicle-list { grid-template-columns: repeat(2, 1fr); }
+            .vehicle-list { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .form-row { flex-direction: column; }
             .sort-bar { overflow-x: auto; flex-wrap: nowrap; }
-            .modal { padding: 20px; }
+            .modal { padding: 18px; border-radius: var(--radius-lg); }
             .modal .form-row { flex-direction: column; }
             .detail-modal .detail-grid { grid-template-columns: 1fr; }
             .compare-bar { padding: 10px 12px; gap: 8px; }
-            .compare-bar .selected-tag { padding: 4px 8px; font-size: 12px; }
+            .compare-bar .selected-tag { padding: 4px 10px; font-size: 0.78rem; }
         }
         @media (max-width: 480px) { .vehicle-list { grid-template-columns: 1fr; } }
-    </style>
+</style>
 </head>
 <body>
 
 <header>
-    <h1>🛵电动两轮车型参数概览平台</h1>
-    <p class="subtitle">覆盖九号、极核、小牛全品牌全系列车型 · 支持多维筛选/排序/编辑/图片管理/车型对比 · 数据云端同步，支持增加雅爱台等其他品牌车型</p>
+    <h1>🛵电动两轮车参数概览平台</h1>
+    <p class="subtitle">覆盖九号、极核、小牛全品牌全系列车型 · 支持多维筛选/排序/编辑/图片管理/车型对比 · 支持增加新品牌车型 · 数据云端同步 </p>
     <div class="header-actions">
         <span class="sync-status" id="syncStatus"><span class="dot red"></span> 未连接</span>
         <button class="settings-btn" onclick="openSettingsModal()">⚙️ 设置</button>
@@ -297,27 +618,20 @@
             </div>
             <div class="form-row">
                 <div class="form-group"><label>轴距（mm）</label><input type="number" id="addWheelbase" placeholder="如：1380"></div>
-                <div class="form-group"><label>刹车类型</label><input type="text" id="addBrakeType" list="addBrakeTypeList" placeholder="选择或输入刹车类型" required>
-<datalist id="addBrakeTypeList">
-    <option value="前后碟刹">
-    <option value="前碟后鼓">
-    <option value="前后鼓刹">
-    <option value="前后碟刹+双通道ABS">
-    <option value="前后碟刹+TCS">
-</datalist></div>
+                <div class="form-group"><label>刹车类型</label><input list="addBrakeTypeList" id="addBrakeType" placeholder="选择或输入刹车类型"><datalist id="addBrakeTypeList"><option value="前后碟刹"><option value="前碟后鼓"><option value="前后鼓刹"><option value="前碟后鼓+ABS"><option value="前后碟刹+ABS"><option value="前后碟刹+ABS+TCS"></datalist></div>
                 <div class="form-group"><label>整车尺寸（mm）</label><input type="text" id="addDimensions" placeholder="如：1800×680×1080"></div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label>电机种类</label><select id="addMotorType"><option value="">请选择</option><option value="轮毂电机">轮毂电机</option><option value="中置电机">中置电机</option><option value="轮毂电机（博世）">轮毂电机（博世）</option><option value="中置水冷电机">中置水冷电机</option><option value="侧挂电机">侧挂电机</option></select></div>
+                <div class="form-group"><label>电机种类</label><input list="addMotorTypeList" id="addMotorType" placeholder="选择或输入电机种类"><datalist id="addMotorTypeList"><option value="轮毂电机"><option value="中置电机"><option value="轮毂电机（博世）"><option value="中置水冷电机"><option value="侧挂电机"></datalist></div>
                 <div class="form-group"><label>坐高（mm）</label><input type="number" id="addSeatHeight" placeholder="如：760"></div>
                 <div class="form-group"><label>销售情况</label><input type="text" id="addSales" placeholder="如：5000档热门走量款"></div>
                 <div class="form-group"><label>上市时间</label><input type="month" id="addLaunchDate" placeholder="如：2025-06"></div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label>仪表类型</label><select id="addInstrumentType"><option value="">请选择</option><option value="LCD液晶仪表">LCD液晶仪表</option><option value="5寸TFT彩屏">5寸TFT彩屏</option><option value="6.2寸TFT彩屏">6.2寸TFT彩屏</option><option value="6.86寸TFT超宽彩屏">6.86寸TFT超宽彩屏</option><option value="7寸触控屏">7寸触控屏</option><option value="4.3寸TFT屏">4.3寸TFT屏</option><option value="指针仪表">指针仪表</option><option value="LED数码仪表">LED数码仪表</option></select></div>
+                <div class="form-group"><label>仪表类型</label><input list="addInstrumentTypeList" id="addInstrumentType" placeholder="选择或输入仪表类型"><datalist id="addInstrumentTypeList"><option value="LCD液晶仪表"><option value="5寸TFT彩屏"><option value="6.2寸TFT彩屏"><option value="6.86寸TFT超宽彩屏"><option value="7寸触控屏"><option value="4.3寸TFT屏"><option value="指针仪表"><option value="LED数码仪表"></datalist></div>
                 <div class="form-group full"><label>智能化功能</label><input type="text" id="addSmartFeatures" placeholder="如：无感解锁、OTA升级、APP远程控制、导航投屏"></div>
             </div>
-            <div class="form-group full"><label>核心卖点</label><textarea id="addHighlights" rows="2" placeholder="如：搭载凌波OS系统，支持无感解锁、OTA升级"></textarea></div>
+            <div class="form-group full"><label>其他参数或卖点</label><textarea id="addHighlights" rows="2" placeholder="如：搭载凌波OS系统，支持无感解锁、OTA升级"></textarea></div>
             <div class="form-group full"><label>车型图片</label><div class="img-upload-area" id="addImgArea"><span class="upload-text">点击或拖拽上传车型图片</span></div><input type="file" id="addImgInput" accept="image/*" style="display:none"></div>
             <br><button type="submit" class="submit-btn">添加车型</button>
         </form>
@@ -364,20 +678,20 @@
             </div>
             <div class="form-row">
                 <div class="form-group"><label>轴距（mm）</label><input type="number" id="editWheelbase" placeholder="如：1380"></div>
-                <div class="form-group"><label>刹车类型</label><select id="editBrakeType"><option value="">请选择</option><option value="前后碟刹">前后碟刹</option><option value="前碟后鼓">前碟后鼓</option><option value="前后鼓刹">前后鼓刹</option><option value="前碟后鼓+ABS">前碟后鼓+ABS</option><option value="前后碟刹+ABS">前后碟刹+ABS</option><option value="前后碟刹+ABS+TCS">前后碟刹+ABS+TCS</option></select></div>
+                <div class="form-group"><label>刹车类型</label><input list="editBrakeTypeList" id="editBrakeType" placeholder="选择或输入刹车类型"><datalist id="editBrakeTypeList"><option value="前后碟刹"><option value="前碟后鼓"><option value="前后鼓刹"><option value="前碟后鼓+ABS"><option value="前后碟刹+ABS"><option value="前后碟刹+ABS+TCS"></datalist></div>
                 <div class="form-group"><label>整车尺寸（mm）</label><input type="text" id="editDimensions" placeholder="如：1800×680×1080"></div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label>电机种类</label><select id="editMotorType"><option value="">请选择</option><option value="轮毂电机">轮毂电机</option><option value="中置电机">中置电机</option><option value="轮毂电机（博世）">轮毂电机（博世）</option><option value="中置水冷电机">中置水冷电机</option><option value="侧挂电机">侧挂电机</option></select></div>
+                <div class="form-group"><label>电机种类</label><input list="editMotorTypeList" id="editMotorType" placeholder="选择或输入电机种类"><datalist id="editMotorTypeList"><option value="轮毂电机"><option value="中置电机"><option value="轮毂电机（博世）"><option value="中置水冷电机"><option value="侧挂电机"></datalist></div>
                 <div class="form-group"><label>坐高（mm）</label><input type="number" id="editSeatHeight" placeholder="如：760"></div>
                 <div class="form-group"><label>销售情况</label><input type="text" id="editSales"></div>
                 <div class="form-group"><label>上市时间</label><input type="month" id="editLaunchDate"></div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label>仪表类型</label><select id="editInstrumentType"><option value="">请选择</option><option value="LCD液晶仪表">LCD液晶仪表</option><option value="5寸TFT彩屏">5寸TFT彩屏</option><option value="6.2寸TFT彩屏">6.2寸TFT彩屏</option><option value="6.86寸TFT超宽彩屏">6.86寸TFT超宽彩屏</option><option value="7寸触控屏">7寸触控屏</option><option value="4.3寸TFT屏">4.3寸TFT屏</option><option value="指针仪表">指针仪表</option><option value="LED数码仪表">LED数码仪表</option></select></div>
+                <div class="form-group"><label>仪表类型</label><input list="editInstrumentTypeList" id="editInstrumentType" placeholder="选择或输入仪表类型"><datalist id="editInstrumentTypeList"><option value="LCD液晶仪表"><option value="5寸TFT彩屏"><option value="6.2寸TFT彩屏"><option value="6.86寸TFT超宽彩屏"><option value="7寸触控屏"><option value="4.3寸TFT屏"><option value="指针仪表"><option value="LED数码仪表"></datalist></div>
                 <div class="form-group full"><label>智能化功能</label><input type="text" id="editSmartFeatures" placeholder="如：无感解锁、OTA升级、APP远程控制、导航投屏"></div>
             </div>
-            <div class="form-group full"><label>核心卖点</label><textarea id="editHighlights" rows="2"></textarea></div>
+            <div class="form-group full"><label>其他参数或卖点</label><textarea id="editHighlights" rows="2"></textarea></div>
             <div class="modal-actions">
                 <button type="button" class="cancel-btn" onclick="closeEditModal()">取消</button>
                 <button type="submit" class="save-btn">保存修改</button>
@@ -740,7 +1054,7 @@ function openCompareModal() {
         { label: '刹车类型', key: 'brakeType', format: v => v.brakeType || '-', raw: v => v.brakeType },
         { label: '仪表类型', key: 'instrumentType', format: v => v.instrumentType || '-', raw: v => v.instrumentType },
         { label: '智能化功能', key: 'smartFeatures', format: v => v.smartFeatures || '-', raw: v => v.smartFeatures },
-        { label: '核心卖点', key: 'highlights', format: v => v.highlights || '-', raw: v => v.highlights },
+        { label: '其他参数或卖点', key: 'highlights', format: v => v.highlights || '-', raw: v => v.highlights },
         { label: '销售定位', key: 'salesInfo', format: v => v.salesInfo || '-', raw: v => v.salesInfo },
         { label: '上市时间', key: 'launchDate', format: v => v.launchDate ? v.launchDate : '-', raw: v => v.launchDate },
     ];
@@ -831,7 +1145,12 @@ function refreshSeriesFilters() {
     seriesFilter.innerHTML = '<option value="all">全部系列</option>' + allSeries.map(s => `<option value="${s}">${s} 系列</option>`).join('');
     seriesFilter.value = allSeries.includes(currentVal) ? currentVal : 'all';
     const addSeries = document.getElementById('addSeries');
-    addSeries.innerHTML = allSeries.map(s => `<option value="${s}">${s} 系列</option>`).join('');
+    const selectedBrand = document.getElementById('addBrand').value;
+    let brandSeries = allSeries;
+    if (selectedBrand) {
+        brandSeries = [...new Set(vehicles.filter(v => v.brand === selectedBrand).map(v => v.series))];
+    }
+    addSeries.innerHTML = brandSeries.map(s => `<option value="${s}">${s} 系列</option>`).join('');
 }
 
 // 动态填充品牌自动完成列表（添加/编辑表单）
@@ -1193,6 +1512,18 @@ async function init() {
         }, 500);
     }
 
+    // 添加表单品牌变化时联动系列
+    document.getElementById('addBrand').addEventListener('input', function() {
+        const selectedBrand = this.value;
+        const addSeries = document.getElementById('addSeries');
+        const allSeries = getAllSeries();
+        let brandSeries = allSeries;
+        if (selectedBrand) {
+            brandSeries = [...new Set(vehicles.filter(v => v.brand === selectedBrand).map(v => v.series))];
+        }
+        addSeries.innerHTML = brandSeries.map(s => `<option value="${s}">${s} 系列</option>`).join('');
+        addSeries.value = '';
+    });
     refreshSeriesFilters();
     renderVehicles();
 }
