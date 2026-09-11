@@ -817,7 +817,7 @@ function renderVehicles() {
             <div class="vehicle-card" data-brand="${v.brand}" data-id="${v.id}">
                 <div class="card-img-wrap" onclick="openDetailModal(${v.id})">
                     ${v.image ? `<img src="${v.image}" alt="${v.name}">` : `<div class="img-placeholder"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg><div>点击查看详细配置</div></div>`}
-                    <div class="upload-hint">📷 点击查看详情 / 右键上传图片</div>
+                    <div class="upload-hint">📷 点击查看详情</div>
                 </div>
                 <div class="card-header">
                     <div class="card-brand-row"><span class="card-brand">${v.brand}</span><span class="card-series-tag">${v.series}系列</span></div>
