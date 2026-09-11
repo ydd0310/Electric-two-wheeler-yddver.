@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>电动两轮车参数概览平台</title>
+    <title>九牛核车型参数与市场概览平台</title>
     <style>
         :root {
             --ios-blue: #007AFF;
@@ -152,7 +152,7 @@
         }
         .sort-btn .arrow { font-size: 9px; margin-left: 2px; }
         .vehicle-list {
-            display: grid; grid-template-columns: repeat(5, 1fr);
+            display: grid; grid-template-columns: repeat(4, 1fr);
             gap: 14px; margin: 0 auto 24px;
         }
         .vehicle-card {
@@ -537,8 +537,8 @@
 <body>
 
 <header>
-    <h1>🛵电动两轮车参数概览平台</h1>
-    <p class="subtitle">覆盖九号、极核、小牛全品牌全系列车型 · 支持多维筛选/排序/编辑/图片管理/车型对比 · 支持增加新品牌车型 · 数据云端同步 </p>
+    <h1>🚗 九牛核车型参数与市场概览平台</h1>
+    <p class="subtitle">覆盖九号、极核、小牛全品牌全系列车型 · 支持多维筛选/排序/编辑/图片管理/车型对比 · 数据云端同步</p>
     <div class="header-actions">
         <span class="sync-status" id="syncStatus"><span class="dot red"></span> 未连接</span>
         <button class="settings-btn" onclick="openSettingsModal()">⚙️ 设置</button>
@@ -631,7 +631,7 @@
                 <div class="form-group"><label>仪表类型</label><input list="addInstrumentTypeList" id="addInstrumentType" placeholder="选择或输入仪表类型"><datalist id="addInstrumentTypeList"><option value="LCD液晶仪表"><option value="5寸TFT彩屏"><option value="6.2寸TFT彩屏"><option value="6.86寸TFT超宽彩屏"><option value="7寸触控屏"><option value="4.3寸TFT屏"><option value="指针仪表"><option value="LED数码仪表"></datalist></div>
                 <div class="form-group full"><label>智能化功能</label><input type="text" id="addSmartFeatures" placeholder="如：无感解锁、OTA升级、APP远程控制、导航投屏"></div>
             </div>
-            <div class="form-group full"><label>其他参数或卖点</label><textarea id="addHighlights" rows="2" placeholder="如：搭载凌波OS系统，支持无感解锁、OTA升级"></textarea></div>
+            <div class="form-group full"><label>核心卖点</label><textarea id="addHighlights" rows="2" placeholder="如：搭载凌波OS系统，支持无感解锁、OTA升级"></textarea></div>
             <div class="form-group full"><label>车型图片</label><div class="img-upload-area" id="addImgArea"><span class="upload-text">点击或拖拽上传车型图片</span></div><input type="file" id="addImgInput" accept="image/*" style="display:none"></div>
             <br><button type="submit" class="submit-btn">添加车型</button>
         </form>
@@ -691,7 +691,7 @@
                 <div class="form-group"><label>仪表类型</label><input list="editInstrumentTypeList" id="editInstrumentType" placeholder="选择或输入仪表类型"><datalist id="editInstrumentTypeList"><option value="LCD液晶仪表"><option value="5寸TFT彩屏"><option value="6.2寸TFT彩屏"><option value="6.86寸TFT超宽彩屏"><option value="7寸触控屏"><option value="4.3寸TFT屏"><option value="指针仪表"><option value="LED数码仪表"></datalist></div>
                 <div class="form-group full"><label>智能化功能</label><input type="text" id="editSmartFeatures" placeholder="如：无感解锁、OTA升级、APP远程控制、导航投屏"></div>
             </div>
-            <div class="form-group full"><label>其他参数或卖点</label><textarea id="editHighlights" rows="2"></textarea></div>
+            <div class="form-group full"><label>核心卖点</label><textarea id="editHighlights" rows="2"></textarea></div>
             <div class="modal-actions">
                 <button type="button" class="cancel-btn" onclick="closeEditModal()">取消</button>
                 <button type="submit" class="save-btn">保存修改</button>
@@ -1054,7 +1054,7 @@ function openCompareModal() {
         { label: '刹车类型', key: 'brakeType', format: v => v.brakeType || '-', raw: v => v.brakeType },
         { label: '仪表类型', key: 'instrumentType', format: v => v.instrumentType || '-', raw: v => v.instrumentType },
         { label: '智能化功能', key: 'smartFeatures', format: v => v.smartFeatures || '-', raw: v => v.smartFeatures },
-        { label: '其他参数或卖点', key: 'highlights', format: v => v.highlights || '-', raw: v => v.highlights },
+        { label: '核心卖点', key: 'highlights', format: v => v.highlights || '-', raw: v => v.highlights },
         { label: '销售定位', key: 'salesInfo', format: v => v.salesInfo || '-', raw: v => v.salesInfo },
         { label: '上市时间', key: 'launchDate', format: v => v.launchDate ? v.launchDate : '-', raw: v => v.launchDate },
     ];
@@ -1261,7 +1261,6 @@ function renderVehicles() {
                 </div>
                 <div class="card-actions">
                     <button class="compare-btn ${inCompare ? 'active' : ''}" onclick="event.stopPropagation();toggleCompare(${v.id})">${inCompare ? '✓ 已选' : '+ 对比'}</button>
-                    <button onclick="event.stopPropagation();triggerCardImgUpload(${v.id})" title="上传图片">📷</button>
                                         <button onclick="event.stopPropagation();openEditModal(${v.id})">✏️</button>
                     <button class="del-btn" onclick="event.stopPropagation();deleteVehicle(${v.id})">🗑</button>
                 </div>
@@ -1470,35 +1469,6 @@ document.getElementById('addForm').addEventListener('submit', async function(e) 
     document.getElementById('vehicleList').scrollIntoView({ behavior: 'smooth' });
 });
 
-
-// ==================== 卡片图片上传 ====================
-let currentCardImgUploadId = null;
-
-function triggerCardImgUpload(id) {
-    currentCardImgUploadId = id;
-    document.getElementById('cardImgInput').click();
-}
-
-function handleCardImgUpload(file) {
-    if (!currentCardImgUploadId) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const v = vehicles.find(v => v.id === currentCardImgUploadId);
-        if (v) {
-            v.image = e.target.result;
-            renderVehicles();
-            syncToGitHub(true);
-        }
-    };
-    reader.readAsDataURL(file);
-    currentCardImgUploadId = null;
-}
-
-document.getElementById('cardImgInput').addEventListener('change', function() {
-    if (this.files[0]) handleCardImgUpload(this.files[0]);
-    this.value = ''; // 重置，允许重复上传同一文件
-});
-
 // ==================== 初始化 ====================
 async function init() {
     const hasConfig = loadGhConfig();
@@ -1561,8 +1531,5 @@ async function init() {
 init();
 </script>
 
-
-<!-- 卡片图片上传隐藏 input -->
-<input type="file" id="cardImgInput" accept="image/*" style="display:none">
 </body>
 </html>
