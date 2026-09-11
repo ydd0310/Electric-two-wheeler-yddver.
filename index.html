@@ -752,14 +752,9 @@ function loadGhConfig() {
         const saved = localStorage.getItem('ghConfig');
         if (saved) {
             ghConfig = JSON.parse(saved);
-            console.log('[配置加载成功] owner=' + ghConfig.owner + ', repo=' + ghConfig.repo + ', token存在=' + !!ghConfig.token);
             return true;
-        } else {
-            console.log('[配置加载] localStorage 中无配置');
         }
-    } catch(e) {
-        console.error('[配置加载异常]', e);
-    }
+    } catch(e) {}
     return false;
 }
 
@@ -921,31 +916,17 @@ async function saveSettings() {
     const owner = document.getElementById('settingOwner').value.trim();
     const repo = document.getElementById('settingRepo').value.trim();
     const token = document.getElementById('settingToken').value.trim();
+
     if (!owner || !repo || !token) {
         alert('请填写完整信息');
         return;
     }
+
     ghConfig = { owner, repo, token };
-    // 立即保存配置到 localStorage，并验证写入成功
-    try {
-        localStorage.setItem('ghConfig', JSON.stringify(ghConfig));
-        // 验证写入：重新读取确认
-        const verify = localStorage.getItem('ghConfig');
-        if (verify) {
-            const parsed = JSON.parse(verify);
-            console.log('[配置保存成功] owner=' + parsed.owner + ', repo=' + parsed.repo);
-        } else {
-            console.error('[配置保存失败] localStorage 写入后读取为空');
-            alert('⚠️ 配置保存到浏览器失败！请检查浏览器是否允许本地存储（非无痕模式）。');
-            return;
-        }
-    } catch(e) {
-        console.error('[配置保存异常]', e);
-        alert('⚠️ 配置保存到浏览器失败：' + e.message + '\n请检查浏览器设置，允许本地存储。');
-        return;
-    }
+    saveGhConfig();
     closeSettingsModal();
-    // 从 GitHub 拉取最新数据（异步，不影响配置保存）
+
+    // 从 GitHub 拉取最新数据
     try {
         showLoading('正在从 GitHub 加载数据…');
         const data = await ghFetchData();
@@ -957,14 +938,14 @@ async function saveSettings() {
         hideLoading();
         refreshSeriesFilters();
         renderVehicles();
-        alert('✅ 设置已保存并同步到 GitHub！Token 已记住，下次打开无需重复配置。');
+        alert('✅ 设置已保存，数据已同步！');
     } catch(e) {
         hideLoading();
-        updateSyncStatus('error', 'GitHub加载失败');
-        // 配置已保存到 localStorage，只是 GitHub 数据加载失败
-        alert('✅ 设置已保存到本地浏览器！\n⚠️ 但从 GitHub 加载数据失败: ' + e.message + '\n\n数据已使用本地缓存，Token 不会丢失。');
+        updateSyncStatus('error', '加载失败');
+        alert('⚠️ 设置已保存，但从 GitHub 加载数据失败: ' + e.message + '\n\n将使用本地缓存数据。');
     }
 }
+
 // ==================== 数据层 ====================
 let vehicles = [];
 
@@ -1443,92 +1424,13 @@ addImgArea.addEventListener('drop', e => {
 });
 addImgInput.addEventListener('change', function() { if (this.files[0]) handleAddFormImage(this.files[0]); });
 
-function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
-
-async function uploadImageToGitHub(file) {
-    if (!ghConfig.owner || !ghConfig.repo || !ghConfig.token) {
-        throw new Error('请先在设置中配置 GitHub 仓库信息');
-    }
-    console.log('[GitHub上传] 开始上传文件:', file.name, '到 images/' + file.name);
-    const base64 = await fileToBase64(file);
-    const pureBase64 = base64.split(',')[1];
-    const fileName = 'vehicle_' + Date.now() + '_' + file.name;
-    const filePath = 'images/' + fileName;
-    const url = GITHUB_API + '/repos/' + ghConfig.owner + '/' + ghConfig.repo + '/contents/' + filePath;
-    const res = await fetch(url, {
-        method: 'PUT',
-        headers: {
-            'Authorization': 'Bearer ' + ghConfig.token,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            message: 'Upload vehicle image: ' + fileName,
-            content: pureBase64
-        })
-    });
-    if (!res.ok) {
-        const errData = await res.json().catch(function() { return {}; });
-        console.error('[GitHub上传] API返回错误:', res.status, errData);
-        throw new Error(errData.message || 'HTTP ' + res.status);
-    }
-    var result = await res.json();
-    console.log('[GitHub上传] 上传成功，文件路径:', filePath);
-    // 自动检测默认分支名（main 或 master）
-    var defaultBranch = 'main';
-    if (result.content && result.content.branch) {
-        defaultBranch = result.content.branch;
-    } else {
-        // 尝试检测仓库默认分支
-        try {
-            const repoRes = await fetch(GITHUB_API + '/repos/' + ghConfig.owner + '/' + ghConfig.repo, {
-                headers: {
-                    'Authorization': 'Bearer ' + ghConfig.token,
-                    'Accept': 'application/vnd.github.v3+json'
-                }
-            });
-            if (repoRes.ok) {
-                const repoData = await repoRes.json();
-                if (repoData.default_branch) {
-                    defaultBranch = repoData.default_branch;
-                }
-            }
-        } catch(e) {
-            console.warn('[GitHub上传] 检测默认分支失败，使用 main');
-        }
-    }
-    var imageUrl = 'https://cdn.jsdelivr.net/gh/' + ghConfig.owner + '/' + ghConfig.repo + '@' + defaultBranch + '/' + filePath;
-    console.log('[GitHub上传] CDN URL:', imageUrl);
-    return imageUrl;
-}
-
-async function handleAddFormImage(file) {
-    if (!file || !file.type.startsWith('image/')) return;
-    console.log('[添加表单图片] 开始上传:', file.name, '大小:', (file.size / 1024).toFixed(1) + 'KB');
-    addImgArea.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ios-blue);">正在上传图片到 GitHub，请稍候...</div>';
-    try {
-        var imageUrl = await uploadImageToGitHub(file);
-        addFormImageData = imageUrl;
-        addImgArea.innerHTML = '<img src="' + imageUrl + '" alt="预览">';
-        console.log('[添加表单图片] 上传成功，预览已更新');
-    } catch (error) {
-        console.error('[添加表单图片] 上传失败:', error);
-        var failMsg = '上传失败: ' + error.message;
-        if (error.message.includes('403') || error.message.includes('401')) {
-            failMsg += '\n\n请检查 GitHub Token 是否有 repo 权限。';
-        } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            failMsg += '\n\n可能是网络问题或 CORS 限制，请检查网络连接。';
-        }
-        addImgArea.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ios-red);font-size:0.82rem;">' + failMsg.replace(/\n/g, '<br>') + '</div>';
-        addFormImageData = '';
-    }
+function handleAddFormImage(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        addFormImageData = e.target.result;
+        addImgArea.innerHTML = `<img src="${addFormImageData}" alt="预览">`;
+    };
+    reader.readAsDataURL(file);
 }
 
 document.getElementById('addForm').addEventListener('submit', async function(e) {
@@ -1577,42 +1479,19 @@ function triggerCardImgUpload(id) {
     document.getElementById('cardImgInput').click();
 }
 
-async function handleCardImgUpload(file) {
-    if (!currentCardImgUploadId || !file) return;
-    console.log('[图片上传] 开始上传:', file.name, '大小:', (file.size / 1024).toFixed(1) + 'KB');
-    try {
-        var imageUrl = await uploadImageToGitHub(file);
-        console.log('[图片上传] 上传成功:', imageUrl);
-        var v = vehicles.find(function(v) { return v.id === currentCardImgUploadId; });
+function handleCardImgUpload(file) {
+    if (!currentCardImgUploadId) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const v = vehicles.find(v => v.id === currentCardImgUploadId);
         if (v) {
-            v.image = imageUrl;
-            console.log('[图片上传] 已更新车型图片:', v.name, v.image);
+            v.image = e.target.result;
             renderVehicles();
-            // 等待渲染完成后检查图片是否加载成功
-            setTimeout(function() {
-                var img = document.querySelector('.vehicle-card[data-id="' + currentCardImgUploadId + '"] img');
-                if (img) {
-                    if (img.complete && img.naturalWidth > 0) {
-                        console.log('[图片上传] 卡片图片加载成功');
-                    } else {
-                        console.warn('[图片上传] 卡片图片加载失败或尺寸为0，可能URL不可用');
-                    }
-                }
-            }, 1000);
             syncToGitHub(true);
         }
-    } catch (error) {
-        console.error('[图片上传] 上传失败:', error);
-        var errorMsg = '图片上传失败: ' + error.message;
-        if (error.message.includes('403') || error.message.includes('401')) {
-            errorMsg += '\n\n请检查 GitHub Token 是否有 repo 权限。';
-        } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            errorMsg += '\n\n可能是网络问题或 CORS 限制，请检查网络连接。';
-        }
-        alert(errorMsg);
-    } finally {
-        currentCardImgUploadId = null;
-    }
+    };
+    reader.readAsDataURL(file);
+    currentCardImgUploadId = null;
 }
 
 document.getElementById('cardImgInput').addEventListener('change', function() {
@@ -1664,10 +1543,7 @@ async function init() {
     }
 
     // 添加表单品牌变化时联动系列
-    document.getElementById('addBrand').addEventListener('input', handleAddBrandChange);
-    document.getElementById('addBrand').addEventListener('change', handleAddBrandChange);
-    document.getElementById('addBrand').addEventListener('blur', handleAddBrandChange);
-    function handleAddBrandChange() {
+    document.getElementById('addBrand').addEventListener('input', function() {
         const selectedBrand = this.value;
         const addSeries = document.getElementById('addSeries');
         const allSeries = getAllSeries();
@@ -1677,7 +1553,7 @@ async function init() {
         }
         addSeries.innerHTML = brandSeries.map(s => `<option value="${s}">${s} 系列</option>`).join('');
         addSeries.value = '';
-    }
+    });
     refreshSeriesFilters();
     renderVehicles();
 }
