@@ -152,7 +152,7 @@
         }
         .sort-btn .arrow { font-size: 9px; margin-left: 2px; }
         .vehicle-list {
-            display: grid; grid-template-columns: repeat(4, 1fr);
+            display: grid; grid-template-columns: repeat(5, 1fr);
             gap: 14px; margin: 0 auto 24px;
         }
         .vehicle-card {
@@ -1244,7 +1244,7 @@ function renderVehicles() {
             <div class="vehicle-card" data-brand="${v.brand}" data-id="${v.id}" style="border-left-color:${getBrandColor(v.brand)}">
                 <div class="card-img-wrap" onclick="openDetailModal(${v.id})">
                     ${v.image ? `<img src="${v.image}" alt="${v.name}">` : `<div class="img-placeholder"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg><div>点击查看详细配置</div></div>`}
-                    <div class="card-img-hint">点击查看详细配置</div>
+                    <div class="card-img-hint">${v.image ? '点击查看详情 / 底部按钮上传图片' : '点击查看详细配置'}</div>
                 </div>
                 <div class="card-header">
                     <div class="card-brand-row"><span class="card-brand" style="color:${getBrandColor(v.brand)}">${v.brand}</span><span class="card-series-tag">${v.series}系列</span></div>
@@ -1261,7 +1261,8 @@ function renderVehicles() {
                 </div>
                 <div class="card-actions">
                     <button class="compare-btn ${inCompare ? 'active' : ''}" onclick="event.stopPropagation();toggleCompare(${v.id})">${inCompare ? '✓ 已选' : '+ 对比'}</button>
-                                        <button onclick="event.stopPropagation();openEditModal(${v.id})">✏️</button>
+                    <button onclick="event.stopPropagation();triggerCardImageUpload(${v.id})" title="上传图片">📷</button>
+                    <button onclick="event.stopPropagation();openEditModal(${v.id})">✏️</button>
                     <button class="del-btn" onclick="event.stopPropagation();deleteVehicle(${v.id})">🗑</button>
                 </div>
             </div>`;
@@ -1371,6 +1372,31 @@ document.getElementById('editForm').addEventListener('submit', async function(e)
     syncToGitHub(true);
 });
 document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) closeEditModal(); });
+
+// ==================== 卡片图片上传 ====================
+function triggerCardImageUpload(id) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.style.display = 'none';
+    document.body.appendChild(input);
+    input.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const v = vehicles.find(v => v.id === id);
+                if (v) {
+                    v.image = e.target.result;
+                    renderVehicles();
+                    syncToGitHub(true);
+                }
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+        document.body.removeChild(input);
+    });
+    input.click();
+}
 
 // ==================== 交互事件 ====================
 async function deleteVehicle(id) {
