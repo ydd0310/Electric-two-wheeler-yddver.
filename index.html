@@ -709,21 +709,28 @@
 <div class="modal-overlay" id="settingsModal">
     <div class="modal settings-modal">
         <h2>⚙️ GitHub 同步设置</h2>
-        <p class="modal-subtitle">配置 GitHub 仓库信息，实现多人云端数据同步</p>
-        <div class="tip-box">
-            <strong>如何获取 Personal Access Token？</strong><br>
-            1. 打开 <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a><br>
-            2. 点击 <code>Generate new token (classic)</code><br>
-            3. 勾选 <code>repo</code> 权限 → 生成并复制 token<br>
-            4. 粘贴到下方输入框（token 仅保存在你本地浏览器中）
+        <p class="modal-subtitle">填入你的写权限 Token 即可参与共同编辑（仓库信息由部署者统一配置）</p>
+        <div class="tip-box" id="settingsTip">
+            <strong>协作写入说明：</strong><br>
+            • <b>读取（全员自动）</b>：仓库与只读 Token 已内嵌，任何人打开即用、自动同步，无需配置。<br>
+            • <b>写入（需要 Token）</b>：要"添加/编辑/删除并写回云端"，你需要在此填入<b>自己的</b>写权限 Token（保存在你本机浏览器，不会上传）。<br>
+            • <b>如何获取（推荐，每人一个）</b>：登录<b>你自己的</b> GitHub → Settings → Developer settings → Personal Access Tokens → <b>Fine-grained token</b> → 仅选中本仓库 → Repository permissions → <code>Contents = Read and Write</code>。<br>
+            • <b>共享模式</b>：若部署者已在代码中内嵌了共享写 Token，则你无需任何配置即可直接增删改（状态栏会显示"可写"）。
         </div>
         <div class="form-row">
             <div class="form-group"><label>GitHub 用户名</label><input type="text" id="settingOwner" placeholder="如：zhangsan"></div>
             <div class="form-group"><label>仓库名</label><input type="text" id="settingRepo" placeholder="如：jiuniuhe"></div>
         </div>
-        <div class="form-group full" style="margin-bottom:12px">
-            <label>Personal Access Token</label>
-            <input type="password" id="settingToken" placeholder="ghp_xxxxxxxxxxxx">
+        <div class="form-group full" style="margin-bottom:6px">
+            <label>你的写权限 Token（可选，填了即可参与编辑）</label>
+            <input type="password" id="settingToken" placeholder="github_pat_xxx（Fine-grained PAT）">
+            <small style="color:var(--text-muted);font-size:0.75rem;">留空 = 只读浏览（若代码内已内嵌共享写 Token 则仍可直接写）</small>
+        </div>
+        <div class="checkbox-row" style="margin-bottom:12px">
+            <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--text-secondary);cursor:pointer">
+                <input type="checkbox" id="settingRemember" checked style="width:auto;padding:0">
+                记住我的 Token（保存在本机浏览器 localStorage，下次免填）
+            </label>
         </div>
         <div class="test-result" id="testResult"></div>
         <div class="modal-actions">
@@ -747,19 +754,150 @@ const DATA_FILE = 'data.json';
 let ghConfig = { owner: '', repo: '', token: '' };
 let fileSha = null; // data.json 的 SHA，更新时需要
 
+// 统一的存储键，避免多处硬编码导致读写不一致
+const GH_CONFIG_KEY = 'jiuniuhe_ghConfig';
+
+// =====================================================================
+// ★★★ 内嵌配置（部署一次，全员免配）★★★
+// ---------------------------------------------------------------------
+// 【关键设计】一份 Token 负责"读"（公开，写死在 HTML 里，人人可用），
+// 一份（或若干）Token 负责"写"。
+//
+//   - 只读 Token：写死在 HTML，权限设为 Contents: Read-only。
+//     任何人打开即用、自动同步最新数据，无法篡改 → 安全公开。
+//
+//   - 写 Token（多人读写的核心）：
+//       · 方案 A（推荐）：writeTokens 留空，每人用自己登录态。
+//         同事在自己账号下生成 Fine-grained PAT（该仓库 Contents: RW），
+//         在"⚙️ 设置"里填自己的 Token。谁改的全程可追溯，可单独撤销。
+//       · 方案 B（省事）：把同一个共享写 Token 放进 writeTokens[]。
+//         全员打开即用、可直接增删改。代价是该 Token 公开在 HTML 中，
+//         任何拿到链接的人都能改仓库 —— 仅限可信小团队。
+//     本地 localStorage 里若有用户自己填的写 Token，优先级最高（方案 A）。
+//
+// 【如何配置（一次性，部署者操作）】
+//   1. 生成只读 Token（Contents: Read-only，仅该仓库）→ 填进 readOnlyToken。
+//   2. 若要方案 B，再生成一个写 Token（Contents: Read and Write）→ 填进 writeTokens[]。
+//   3. 把 data.json（车型数组）放到仓库根目录，推送到 GitHub Pages。
+//   4. 此后任何人打开网页 = 自动读 +（方案B或填Token后）自动写。
+// =====================================================================
+
+const EMBEDDED_CONFIG = {
+    // ↓↓↓ 改成你自己的 只读 Token（Fine-grained PAT，Contents: Read-only）↓↓↓
+    readOnlyToken: '',
+    // ↓↓↓ 改成你的仓库信息 ↓↓↓
+    owner: '',
+    repo: '',
+
+    // =================================================================
+    // ★★★ 多人写入支持（全员可读写模式）★★★
+    // -----------------------------------------------------------------
+    // 【场景】你希望同事也能"添加/编辑/删除"车型并写回云端。
+    // 【原理】GitHub Contents API 要求写操作必须带认证，纯前端无法绕开。
+    //         因此需要一个"有写权限"的 Token。两种做法，按需启用：
+    //
+    // 方案 A（推荐，最安全）：每人用自己登录态 —— 留空 writeTokens，
+    //   让同事各自在自己的 GitHub 账号下生成 Fine-grained PAT（仅该仓库
+    //   Contents: Read and Write），然后在"⚙️ 设置"里填入自己的 Token。
+    //   → 谁改的全程可追溯，一人泄露可单独撤销，不影响他人。
+    //
+    // 方案 B（最省事）：共享一个写 Token —— 把同一个写权限 PAT 填进下方
+    //   writeTokens 数组（可放多个，第一个优先）。部署后所有人打开即用，
+    //   无需任何配置即可读写。
+    //   → 代价：该 Token 对仓库有写权限，且公开在 HTML 中，等价于
+    //     "任何拿到链接的人都能改仓库"，仅适用于完全内部、可信的小团队。
+    //
+    // 【权限要求】Fine-grained PAT：仅选中 data.json 所在仓库，
+    //   Repository permissions → Contents = Read and Write。
+    //   不要用 Classic PAT（ghp_），细粒度令牌可限定到单仓库。
+    // =================================================================
+    writeTokens: [
+        // '',                          // ← 方案 B：把共享写 Token 填这里，如 'github_pat_xxx'
+        // '',                          //   可填多个做轮换，第一个生效
+    ]
+};
+
+// 是否使用了内嵌的只读配置（owner/repo 填了即视为启用）
+function hasEmbeddedConfig() {
+    return !!(EMBEDDED_CONFIG.owner && EMBEDDED_CONFIG.repo);
+}
+
+// 只读 Token：内嵌配置优先；未配置则返回空串（此时读取走公开仓库无需 Token）
+function getReadOnlyToken() {
+    return (EMBEDDED_CONFIG.readOnlyToken || '').trim();
+}
+
+// ---------------------------------------------------------------------
+//  多人写入：写 Token 的来源优先级
+//   1. 当前用户本地 localStorage 中自己填的 Token（方案 A，最高优先，可追溯）
+//   2. 内嵌的 writeTokens[] 列表（方案 B，共享，全员可用）
+//   3. 都没有 → 返回空串（此时 canWrite()=false，仅可读）
+// ---------------------------------------------------------------------
+
+// 取出"当前生效的写 Token"（不含只读 Token，避免误用）
+function getWriteToken() {
+    // 1) 本地用户自己配的（方案 A）
+    const local = (ghConfig.token || '').trim();
+    if (local) return local;
+    // 2) 内嵌共享写 Token 列表中的第一个有效项（方案 B）
+    const embedded = (EMBEDDED_CONFIG.writeTokens || [])
+        .map(t => String(t).trim())
+        .find(t => t.length > 0);
+    return embedded || '';
+}
+
+// 是否内嵌了共享写 Token（方案 B 是否启用）
+function hasEmbeddedWriteToken() {
+    return (EMBEDDED_CONFIG.writeTokens || []).some(t => String(t).trim().length > 0);
+}
+
+// 收集所有可用的写 Token（本地 + 内嵌），用于"自动试错重试"
+function collectWriteTokens() {
+    const list = [];
+    const local = (ghConfig.token || '').trim();
+    if (local) list.push({ token: local, label: '本地Token' });
+    (EMBEDDED_CONFIG.writeTokens || [])
+        .map(t => String(t).trim())
+        .filter(t => t.length > 0)
+        .forEach(t => list.push({ token: t, label: '内嵌共享Token' }));
+    // 去重（避免本地恰好等于内嵌之一）
+    const seen = new Set();
+    return list.filter(x => { if (seen.has(x.token)) return false; seen.add(x.token); return true; });
+}
+
 function loadGhConfig() {
     try {
-        const saved = localStorage.getItem('ghConfig');
+        const saved = localStorage.getItem(GH_CONFIG_KEY);
         if (saved) {
-            ghConfig = JSON.parse(saved);
-            return true;
+            const parsed = JSON.parse(saved);
+            // 防御性校验：必须包含有效的 token 才视为已配置
+            if (parsed && typeof parsed === 'object' && parsed.token && String(parsed.token).trim()) {
+                ghConfig = {
+                    owner: parsed.owner || '',
+                    repo: parsed.repo || '',
+                    token: String(parsed.token).trim()
+                };
+                return true;
+            }
         }
-    } catch(e) {}
+    } catch(e) {
+        console.warn('读取 GitHub 配置失败:', e);
+    }
+    // 读取失败或未配置时，确保内存中为干净状态
+    ghConfig = { owner: '', repo: '', token: '' };
     return false;
 }
 
 function saveGhConfig() {
-    localStorage.setItem('ghConfig', JSON.stringify(ghConfig));
+    try {
+        // 去除首尾空格，避免复制粘贴时带入不可见字符导致校验失败
+        ghConfig.token = String(ghConfig.token || '').trim();
+        ghConfig.owner = String(ghConfig.owner || '').trim();
+        ghConfig.repo  = String(ghConfig.repo  || '').trim();
+        localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(ghConfig));
+    } catch(e) {
+        console.warn('保存 GitHub 配置失败:', e);
+    }
 }
 
 function updateSyncStatus(status, text) {
@@ -778,59 +916,143 @@ function hideLoading() {
 }
 
 // ==================== GitHub API 操作 ====================
-async function ghFetchData() {
-    if (!ghConfig.owner || !ghConfig.repo || !ghConfig.token) return null;
-    const url = `${GITHUB_API}/repos/${ghConfig.owner}/${ghConfig.repo}/contents/${DATA_FILE}`;
+
+// 组装请求头：
+//   - 读取类请求：优先写 Token（若有的话，写 Token 必然可读），其次只读 Token，最后无认证（public 仓库）。
+//   - 写操作请直接用 saveWithToken()，它会显式指定写 Token，绝不会误用只读 Token。
+function buildHeaders(extra, authTokenOverride) {
+    const headers = { 'Accept': 'application/vnd.github.v3+json' };
+    const authToken = (authTokenOverride != null)
+        ? String(authTokenOverride).trim()
+        : (getWriteToken() || getReadOnlyToken() || '');
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+    return Object.assign(headers, extra || {});
+}
+
+// 用指定 Token 执行一次写回（PUT contents），返回 {ok, res, data}
+async function saveWithToken(vehiclesData, token) {
+    const { owner, repo } = activeRepo();
+    const url = `${GITHUB_API}/repos/${owner}/${repo}/contents/${DATA_FILE}`;
+    const contentStr = JSON.stringify(vehiclesData, null, 2);
+    const base64Content = btoa(unescape(encodeURIComponent(contentStr)));
+    const body = { message: `更新车型数据 - ${new Date().toLocaleString('zh-CN')}`, content: base64Content };
+    if (fileSha) body.sha = fileSha;
     const res = await fetch(url, {
-        headers: {
-            'Authorization': `Bearer ${ghConfig.token}`,
-            'Accept': 'application/vnd.github.v3+json'
-        }
+        method: 'PUT',
+        headers: buildHeaders({ 'Content-Type': 'application/json' }, token)
     });
+    const data = await res.json().catch(() => ({}));
+    return { ok: res.ok, res, data };
+}
+
+// 当前生效的仓库信息：优先用内嵌配置（全员一致），其次用本地设置
+function activeRepo() {
+    if (hasEmbeddedConfig()) return { owner: EMBEDDED_CONFIG.owner, repo: EMBEDDED_CONFIG.repo };
+    return { owner: ghConfig.owner, repo: ghConfig.repo };
+}
+
+// 是否具备"写回"能力：
+//   - 本地配了写 Token（方案 A），或
+//   - 内嵌了共享写 Token（方案 B）
+//   且仓库信息齐全
+function canWrite() {
+    const hasToken = !!(getWriteToken());
+    const hasRepo = !!(activeRepo().owner && activeRepo().repo);
+    return hasToken && hasRepo;
+}
+
+async function ghFetchData(authToken) {
+    const { owner, repo } = activeRepo();
+    if (!owner || !repo) return null;
+    const url = `${GITHUB_API}/repos/${owner}/${repo}/contents/${DATA_FILE}`;
+    const res = await fetch(url, { headers: buildHeaders({}, authToken) });
     if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
     const data = await res.json();
-    fileSha = data.sha;
+    // 记录 SHA：后续若有写 Token，写回时需要它做乐观更新
+    if (data.sha) fileSha = data.sha;
     // GitHub API 返回的 content 是 base64 编码的，需要解码
-    const content = data.content.replace(/\n/g, '');
-    const decoded = decodeURIComponent(escape(atob(content)));
-    return JSON.parse(decoded);
+    if (data.content) {
+        const content = data.content.replace(/\n/g, '');
+        const decoded = decodeURIComponent(escape(atob(content)));
+        return JSON.parse(decoded);
+    }
+    return null;
 }
 
 async function ghSaveData(vehiclesData) {
-    if (!ghConfig.owner || !ghConfig.repo || !ghConfig.token) return false;
-    const url = `${GITHUB_API}/repos/${ghConfig.owner}/${ghConfig.repo}/contents/${DATA_FILE}`;
-    // 内容需要先 UTF-8 编码再 Base64 编码（支持中文）
-    const contentStr = JSON.stringify(vehiclesData, null, 2);
-    const base64Content = btoa(unescape(encodeURIComponent(contentStr)));
-
-    const body = {
-        message: `更新车型数据 - ${new Date().toLocaleString('zh-CN')}`,
-        content: base64Content
-    };
-    if (fileSha) body.sha = fileSha;
-
-    const res = await fetch(url, {
-        method: 'PUT',
-        headers: {
-            'Authorization': `Bearer ${ghConfig.token}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-    });
-    if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.message || `HTTP ${res.status}`);
+    // 写回必须至少有一个写 Token（本地或内嵌共享）
+    if (!canWrite()) {
+        throw new Error('当前无写入权限。请到「⚙️ 设置」配置具有写权限的 Token（或联系管理员启用共享写入）。');
     }
-    const result = await res.json();
-    fileSha = result.content.sha; // 更新 SHA
-    return true;
+    const tokens = collectWriteTokens();
+    if (tokens.length === 0) {
+        throw new Error('未找到可用的写 Token。');
+    }
+
+    // 逐个 Token 尝试：先本地、后内嵌共享。遇到 409（SHA 冲突）则刷新 SHA 重试一次。
+    let lastErr = null;
+    for (const { token } of tokens) {
+        try {
+            // 每次尝试前用当前 Token 重新拉取最新 SHA，降低冲突概率
+            try { await ghFetchData(token); } catch(e) { /* 忽略，下面 save 会用已有 fileSha 或 不带 sha */ }
+
+            let result = await saveWithToken(vehiclesData, token);
+
+            // 409 = SHA 过期（别人/自己刚改过），刷新 SHA 后重试一次
+            if (result.res.status === 409) {
+                try { await ghFetchData(token); } catch(e) {}
+                result = await saveWithToken(vehiclesData, token);
+            }
+
+            if (result.ok) {
+                fileSha = (result.data && result.data.content && result.data.content.sha) || null;
+                return true;
+            }
+
+            // 403/401 = 该 Token 无写权限 → 试下一个；其他错误也记录
+            lastErr = new Error((result.data && result.data.message) || `HTTP ${result.res.status}`);
+            if (result.res.status === 401 || result.res.status === 403) continue;
+            // 404（data.json 不存在）属于致命，直接抛
+            if (result.res.status === 404) throw lastErr;
+        } catch(e) {
+            lastErr = e;
+            // 网络类等错误也尝试下一个
+        }
+    }
+    throw lastErr || new Error('所有可用 Token 均写入失败');
+}
+
+// 拉取数据时可指定认证 Token（用于写回前刷新 SHA，避免误用只读 Token）
+async function ghFetchData(authToken) {
+    const { owner, repo } = activeRepo();
+    if (!owner || !repo) return null;
+    const url = `${GITHUB_API}/repos/${owner}/${repo}/contents/${DATA_FILE}`;
+    const res = await fetch(url, { headers: buildHeaders({}, authToken) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    const data = await res.json();
+    if (data.sha) fileSha = data.sha;
+    if (data.content) {
+        const content = data.content.replace(/\n/g, '');
+        const decoded = decodeURIComponent(escape(atob(content)));
+        return JSON.parse(decoded);
+    }
+    return null;
 }
 
 // 同步数据到 GitHub（带防抖和乐观更新）
+// 说明：只有配置了"写 Token"的管理员浏览器才会真正写回。
+// 普通成员（仅有只读 Token 或无 Token）调用时会被安全拦截并提示，不会报错崩溃。
 let syncTimer = null;
 async function syncToGitHub(showMsg) {
-    if (!ghConfig.token) return;
+    if (!canWrite()) {
+        // 无写权限：仅把改动保留在本地 localStorage，并友好提示
+        try { localStorage.setItem('vehicleDataCache', JSON.stringify(vehicles)); } catch(e) {}
+        if (showMsg) {
+            alert('ℹ️ 当前为只读模式，你的改动仅保存在本机浏览器，未写回云端。\n\n如需共同编辑，请到「⚙️ 设置」填入你的写权限 Token（Fine-grained PAT，该仓库 Contents: Read and Write）。');
+        }
+        renderVehicles();
+        return;
+    }
     clearTimeout(syncTimer);
     syncTimer = setTimeout(async () => {
         try {
@@ -839,7 +1061,7 @@ async function syncToGitHub(showMsg) {
             updateSyncStatus('connected', '已同步');
             // 同时缓存到 localStorage
             localStorage.setItem('vehicleDataCache', JSON.stringify(vehicles));
-            if (showMsg) alert('✅ 数据已同步到 GitHub！');
+            if (showMsg) alert('✅ 数据已同步到 GitHub！（其他成员刷新后即可看到）');
         } catch(e) {
             updateSyncStatus('error', '同步失败');
             console.error('同步失败:', e);
@@ -850,11 +1072,30 @@ async function syncToGitHub(showMsg) {
 
 // ==================== 设置弹窗 ====================
 function openSettingsModal() {
-    document.getElementById('settingOwner').value = ghConfig.owner || '';
-    document.getElementById('settingRepo').value = ghConfig.repo || '';
+    const { owner, repo } = activeRepo();
+    document.getElementById('settingOwner').value = owner || '';
+    document.getElementById('settingRepo').value = repo || '';
+    // 只回显用户自己填的写 Token；内嵌共享写 Token 不展示（避免误改/泄露）
     document.getElementById('settingToken').value = ghConfig.token || '';
+    document.getElementById('settingRemember').checked = true;
     document.getElementById('testResult').className = 'test-result';
     document.getElementById('testResult').textContent = '';
+
+    // 动态更新说明：根据当前写入模式提示用户
+    const tipEl = document.getElementById('settingsTip');
+    let writeLine;
+    if (hasEmbeddedWriteToken()) {
+        writeLine = '<b>写入（全员可写）</b>：已内嵌共享写 Token，打开网页即可增删改，无需任何配置。';
+    } else if (ghConfig.token) {
+        writeLine = '<b>写入（你已配置）</b>：你填的 Token 有效，可参与编辑。建议改用你自己 GitHub 账号的 Fine-grained PAT 以便追溯。';
+    } else {
+        writeLine = '<b>写入（需配置）</b>：要参与编辑，请在下方填入<b>你自己的</b>写权限 Token（Fine-grained PAT，该仓库 Contents: Read and Write）。';
+    }
+    const readLine = hasEmbeddedConfig()
+        ? '<b>读取（全员自动）</b>：已内嵌仓库 <code>' + EMBEDDED_CONFIG.owner + '/' + EMBEDDED_CONFIG.repo + '</code>，全员免配。'
+        : '<b>读取</b>：需先在代码中配置 EMBEDDED_CONFIG（仓库信息 + 只读 Token）。';
+    tipEl.innerHTML = '<strong>协作写入说明：</strong><br>• ' + readLine + '<br>• ' + writeLine;
+
     document.getElementById('settingsModal').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
@@ -874,9 +1115,14 @@ async function testConnection() {
     const token = document.getElementById('settingToken').value.trim();
     const resultEl = document.getElementById('testResult');
 
-    if (!owner || !repo || !token) {
+    // 允许使用内嵌的仓库信息（用户可能没手填）
+    const { owner: useOwner, repo: useRepo } = activeRepo();
+    const targetOwner = owner || useOwner;
+    const targetRepo = repo || useRepo;
+
+    if (!targetOwner || !targetRepo) {
         resultEl.className = 'test-result error';
-        resultEl.textContent = '请填写完整信息';
+        resultEl.textContent = '请填写用户名和仓库名（或先在代码中配置 EMBEDDED_CONFIG）';
         return;
     }
 
@@ -884,23 +1130,31 @@ async function testConnection() {
     resultEl.textContent = '测试中…';
     resultEl.style.display = 'block';
 
+    const url = `${GITHUB_API}/repos/${targetOwner}/${targetRepo}/contents/${DATA_FILE}`;
+    // 测试读取（用填入的 Token 或只读 Token）
+    const readHeaders = token ? { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+                              : buildHeaders();
     try {
-        const url = `${GITHUB_API}/repos/${owner}/${repo}/contents/${DATA_FILE}`;
-        const res = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Accept': 'application/vnd.github.v3+json'
-            }
-        });
+        const res = await fetch(url, { headers: readHeaders });
         if (res.ok) {
             const data = await res.json();
-            const content = data.content.replace(/\n/g, '');
-            const decoded = JSON.parse(decodeURIComponent(escape(atob(content))));
+            let info = `✅ 读取成功！找到 ${dataArrayLen(data)} 条车型数据`;
+            // 判断写权限：本地已填 Token，或内嵌了共享写 Token
+            if (token) {
+                info += '\n🔑 写权限 Token 已填入，保存后即可共同编辑';
+            } else if (hasEmbeddedWriteToken()) {
+                info += '\n🔑 检测到内嵌共享写 Token，保存后全员可直接写';
+            } else {
+                info += '\nℹ️ 当前为只读。填入写权限 Token 后可参与编辑';
+            }
             resultEl.className = 'test-result success';
-            resultEl.textContent = `✅ 连接成功！找到 ${decoded.length} 款车型数据`;
+            resultEl.textContent = info;
         } else if (res.status === 404) {
             resultEl.className = 'test-result error';
             resultEl.textContent = '❌ 仓库中未找到 data.json 文件，请先上传';
+        } else if (res.status === 401 || res.status === 403) {
+            resultEl.className = 'test-result error';
+            resultEl.textContent = '❌ 认证失败：Token 无效或无权限。请改用 Fine-grained PAT，并授予该仓库 Contents: Read and Write';
         } else {
             const err = await res.json().catch(() => ({}));
             resultEl.className = 'test-result error';
@@ -912,18 +1166,50 @@ async function testConnection() {
     }
 }
 
+// 兼容 data.json 返回：有的是 base64 编码的 JSON 数组，有的直接是数组
+function dataArrayLen(data) {
+    try {
+        if (Array.isArray(data)) return data.length;
+        if (data && data.content) {
+            const content = data.content.replace(/\n/g, '');
+            const decoded = JSON.parse(decodeURIComponent(escape(atob(content))));
+            return Array.isArray(decoded) ? decoded.length : 0;
+        }
+    } catch(e) {}
+    return 0;
+}
+
 async function saveSettings() {
     const owner = document.getElementById('settingOwner').value.trim();
     const repo = document.getElementById('settingRepo').value.trim();
     const token = document.getElementById('settingToken').value.trim();
+    const remember = document.getElementById('settingRemember').checked;
 
-    if (!owner || !repo || !token) {
-        alert('请填写完整信息');
-        return;
+    // 内嵌共享写 Token 模式下，owner/repo 可沿用内嵌值，允许为空
+    const useEmbeddedRepo = !owner || !repo;
+    if (!useEmbeddedRepo) {
+        ghConfig.owner = owner;
+        ghConfig.repo = repo;
+    } else {
+        const { owner: eo, repo: er } = activeRepo();
+        ghConfig.owner = eo;
+        ghConfig.repo = er;
     }
 
-    ghConfig = { owner, repo, token };
-    saveGhConfig();
+    // Token：勾选"记住"则存 localStorage（方案 A）；否则仅本次会话有效
+    ghConfig.token = token;
+    if (remember && token) {
+        saveGhConfig();
+    } else if (!token) {
+        // 未填 Token：保留之前记住的（若有），否则清空
+        if (!remember) { ghConfig.token = ''; saveGhConfig(); }
+    } else {
+        // 填了但不记住 → 仅本次，不写 localStorage（刷新后会回到共享/只读）
+        saveGhConfig();
+    }
+
+    // 重置 SHA，下次写入会用最新值
+    fileSha = null;
     closeSettingsModal();
 
     // 从 GitHub 拉取最新数据
@@ -938,7 +1224,12 @@ async function saveSettings() {
         hideLoading();
         refreshSeriesFilters();
         renderVehicles();
-        alert('✅ 设置已保存，数据已同步！');
+        if (canWrite()) {
+            const via = ghConfig.token ? '你自己的 Token' : '内嵌的共享写 Token';
+            alert('✅ 写入权限已就绪（通过 ' + via + '）。\n\n此后任何人添加/编辑/删除车型都会写回 GitHub，其他成员刷新即可看到。');
+        } else {
+            alert('✅ 设置已保存（只读模式）。\n\n要参与编辑，请在「你的写权限 Token」处填入你的 Fine-grained PAT（该仓库 Contents: Read and Write）。');
+        }
     } catch(e) {
         hideLoading();
         updateSyncStatus('error', '加载失败');
@@ -1140,17 +1431,41 @@ function refreshSeriesFilters() {
     refreshBrandFilter();
     populateBrandDatalists();
     const allSeries = getAllSeries();
+    // 顶部"系列"筛选器：跟随"品牌"筛选器联动，只显示该品牌下的系列
     const seriesFilter = document.getElementById('seriesFilter');
     const currentVal = seriesFilter.value;
-    seriesFilter.innerHTML = '<option value="all">全部系列</option>' + allSeries.map(s => `<option value="${s}">${s} 系列</option>`).join('');
-    seriesFilter.value = allSeries.includes(currentVal) ? currentVal : 'all';
+    const selectedBrandFilter = document.getElementById('brandFilter').value;
+    let filterSeries = allSeries;
+    if (selectedBrandFilter && selectedBrandFilter !== 'all') {
+        filterSeries = [...new Set(
+            vehicles.filter(v => v.brand === selectedBrandFilter).map(v => v.series)
+        )].sort();
+    }
+    seriesFilter.innerHTML = '<option value="all">全部系列</option>'
+        + filterSeries.map(s => `<option value="${s}">${s} 系列</option>`).join('');
+    seriesFilter.value = filterSeries.includes(currentVal) ? currentVal : 'all';
+    // 新增表单的"所属系列"下拉框：只列出当前所选品牌下的系列（Bug 修复核心）
+    populateAddSeries();
+}
+
+// 根据当前"所属品牌"输入值，刷新新增表单的"所属系列"下拉框
+// 选择某品牌后，系列下拉框只展示该品牌下的系列；品牌为空时展示全部系列
+function populateAddSeries() {
+    const addBrandEl = document.getElementById('addBrand');
     const addSeries = document.getElementById('addSeries');
-    const selectedBrand = document.getElementById('addBrand').value;
+    if (!addSeries) return;
+    const selectedBrand = (addBrandEl.value || '').trim();
+    const allSeries = getAllSeries();
     let brandSeries = allSeries;
     if (selectedBrand) {
-        brandSeries = [...new Set(vehicles.filter(v => v.brand === selectedBrand).map(v => v.series))];
+        brandSeries = [...new Set(
+            vehicles.filter(v => v.brand === selectedBrand).map(v => v.series)
+        )].sort();
     }
+    const currentVal = addSeries.value;
     addSeries.innerHTML = brandSeries.map(s => `<option value="${s}">${s} 系列</option>`).join('');
+    // 保留当前选中值（若仍属于该品牌），否则清空
+    addSeries.value = brandSeries.includes(currentVal) ? currentVal : '';
 }
 
 // 动态填充品牌自动完成列表（添加/编辑表单）
@@ -1424,55 +1739,13 @@ addImgArea.addEventListener('drop', e => {
 });
 addImgInput.addEventListener('change', function() { if (this.files[0]) handleAddFormImage(this.files[0]); });
 
-function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
-
-async function uploadImageToGitHub(file) {
-    if (!ghConfig.owner || !ghConfig.repo || !ghConfig.token) {
-        throw new Error('请先在设置中配置 GitHub 仓库信息');
-    }
-    const base64 = await fileToBase64(file);
-    const pureBase64 = base64.split(',')[1];
-    const fileName = 'vehicle_' + Date.now() + '_' + file.name;
-    const filePath = 'images/' + fileName;
-    const url = GITHUB_API + '/repos/' + ghConfig.owner + '/' + ghConfig.repo + '/contents/' + filePath;
-    const res = await fetch(url, {
-        method: 'PUT',
-        headers: {
-            'Authorization': 'Bearer ' + ghConfig.token,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            message: 'Upload vehicle image: ' + fileName,
-            content: pureBase64
-        })
-    });
-    if (!res.ok) {
-        const errData = await res.json().catch(function() { return {}; });
-        throw new Error(errData.message || 'HTTP ' + res.status);
-    }
-    var result = await res.json();
-    return 'https://cdn.jsdelivr.net/gh/' + ghConfig.owner + '/' + ghConfig.repo + '@main/' + filePath;
-}
-
-async function handleAddFormImage(file) {
-    if (!file || !file.type.startsWith('image/')) return;
-    addImgArea.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ios-blue);">正在上传图片到 GitHub，请稍候...</div>';
-    try {
-        var imageUrl = await uploadImageToGitHub(file);
-        addFormImageData = imageUrl;
-        addImgArea.innerHTML = '<img src="' + imageUrl + '" alt="预览">';
-    } catch (error) {
-        addImgArea.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ios-red);">上传失败: ' + error.message + '</div>';
-        addFormImageData = '';
-    }
+function handleAddFormImage(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        addFormImageData = e.target.result;
+        addImgArea.innerHTML = `<img src="${addFormImageData}" alt="预览">`;
+    };
+    reader.readAsDataURL(file);
 }
 
 document.getElementById('addForm').addEventListener('submit', async function(e) {
@@ -1521,21 +1794,19 @@ function triggerCardImgUpload(id) {
     document.getElementById('cardImgInput').click();
 }
 
-async function handleCardImgUpload(file) {
-    if (!currentCardImgUploadId || !file) return;
-    try {
-        var imageUrl = await uploadImageToGitHub(file);
-        var v = vehicles.find(function(v) { return v.id === currentCardImgUploadId; });
+function handleCardImgUpload(file) {
+    if (!currentCardImgUploadId) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const v = vehicles.find(v => v.id === currentCardImgUploadId);
         if (v) {
-            v.image = imageUrl;
+            v.image = e.target.result;
             renderVehicles();
             syncToGitHub(true);
         }
-    } catch (error) {
-        alert('图片上传失败: ' + error.message);
-    } finally {
-        currentCardImgUploadId = null;
-    }
+    };
+    reader.readAsDataURL(file);
+    currentCardImgUploadId = null;
 }
 
 document.getElementById('cardImgInput').addEventListener('change', function() {
@@ -1545,26 +1816,39 @@ document.getElementById('cardImgInput').addEventListener('change', function() {
 
 // ==================== 初始化 ====================
 async function init() {
-    const hasConfig = loadGhConfig();
+    // ---------- 1. 确定数据来源与身份 ----------
+    // 身份分三类（按优先级）：
+    //   A. 内嵌了仓库信息（EMBEDDED_CONFIG） → 全员可读取
+    //      A1. 同时内嵌了共享写 Token（writeTokens[]）→ 全员可直接增删改
+    //      A2. 未内嵌写 Token → 仅读取；想写需自己填 Token
+    //   B. 本地 localStorage 配了写 Token → 本人可读写（方案 A，可追溯）
+    //   C. 完全无配置 → 本地缓存 / 默认数据，引导去设置
+    const embedded = hasEmbeddedConfig();
+    const localConfigOk = loadGhConfig() && !!ghConfig.token;
 
-    if (hasConfig && ghConfig.token) {
-        // 尝试从 GitHub 加载数据
+    // 归一化 ghConfig 的 owner/repo（始终指向 activeRepo，方便后续 canWrite 判断）
+    const { owner, repo } = activeRepo();
+    ghConfig.owner = owner;
+    ghConfig.repo = repo;
+
+    if (embedded || localConfigOk) {
+        // ---------- 2. 从 GitHub 拉取最新数据 ----------
         try {
             updateSyncStatus('syncing', '加载中…');
+            // 读取用写 Token（若有）优先，否则只读 Token，最后无认证
             const data = await ghFetchData();
             if (data && data.length > 0) {
                 vehicles = data;
-                updateSyncStatus('connected', '已同步');
             } else {
                 vehicles = [...defaultVehicles];
-                updateSyncStatus('connected', '已加载默认数据');
             }
-            // 缓存到 localStorage
+            // 缓存到 localStorage（加速下次打开 + 离线可用）
             localStorage.setItem('vehicleDataCache', JSON.stringify(vehicles));
+            // 状态栏：根据是否可写显示不同文案
+            updateSyncStatus('connected', canWrite() ? '已同步 · 可写' : '已同步 · 只读');
         } catch(e) {
             console.warn('GitHub 加载失败，使用本地缓存', e);
             updateSyncStatus('error', '离线模式');
-            // 尝试从 localStorage 缓存加载
             try {
                 const cached = localStorage.getItem('vehicleDataCache');
                 if (cached) { vehicles = JSON.parse(cached); }
@@ -1572,13 +1856,13 @@ async function init() {
             } catch(e2) { vehicles = [...defaultVehicles]; }
         }
     } else {
-        // 没有配置 GitHub，使用默认数据
+        // ---------- 3. 完全无配置：本地缓存 / 默认数据 ----------
         try {
             const cached = localStorage.getItem('vehicleDataCache');
             if (cached) { vehicles = JSON.parse(cached); updateSyncStatus('offline', '本地模式'); }
             else { vehicles = [...defaultVehicles]; updateSyncStatus('offline', '未配置'); }
         } catch(e) { vehicles = [...defaultVehicles]; updateSyncStatus('offline', '未配置'); }
-        // 首次使用，弹出设置提示
+        // 仅在确实未部署内嵌配置时，才提示管理员去设置
         setTimeout(() => {
             if (confirm('👋 欢迎使用！\n\n检测到尚未配置 GitHub 同步。\n\n是否现在配置？配置后数据将自动同步到云端，支持多人协作。\n\n（也可以稍后点击右上角「设置」按钮配置）')) {
                 openSettingsModal();
@@ -1586,20 +1870,20 @@ async function init() {
         }, 500);
     }
 
-    // 添加表单品牌变化时联动系列
-    document.getElementById('addBrand').addEventListener('input', function() {
-        const selectedBrand = this.value;
-        const addSeries = document.getElementById('addSeries');
-        const allSeries = getAllSeries();
-        let brandSeries = allSeries;
-        if (selectedBrand) {
-            brandSeries = [...new Set(vehicles.filter(v => v.brand === selectedBrand).map(v => v.series))];
-        }
-        addSeries.innerHTML = brandSeries.map(s => `<option value="${s}">${s} 系列</option>`).join('');
-        addSeries.value = '';
-    });
-    refreshSeriesFilters();
+    // 添加表单：品牌变化时联动系列下拉框（同时监听 input 与 change，
+    // 兼容键盘输入、从 datalist 点选、自动填充等多种触发方式）
+    const addBrandEl = document.getElementById('addBrand');
+    const syncAddSeries = () => populateAddSeries();
+    addBrandEl.addEventListener('input', syncAddSeries);
+    addBrandEl.addEventListener('change', syncAddSeries);
+    addBrandEl.addEventListener('blur', syncAddSeries);
+    refreshSeriesFilters();   // 内部会按当前品牌值调用 populateAddSeries()
     renderVehicles();
+
+    // 启动时刷新一次 SHA（确保写回时 SHA 是最新的），用写 Token 优先
+    if (embedded || localConfigOk) {
+        try { await ghFetchData(getWriteToken() || getReadOnlyToken()); } catch(e) {}
+    }
 }
 
 init();
