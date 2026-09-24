@@ -305,7 +305,7 @@
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .modal-overlay.active .modal { transform: scale(1) translateY(0); }
-        .modal h2 { font-size: 1.2rem; margin-bottom: 2px; color: var(--text); letter-spacing: -0.01em; }
+        .modal h2 { font-size: 1.15rem; margin-bottom: 2px; color: var(--text); letter-spacing: -0.01em; }
         .modal .modal-subtitle { color: var(--text-light); font-size: 0.82rem; margin-bottom: 16px; }
         .modal .form-row { display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
         .modal .form-group { flex: 1; min-width: 150px; }
@@ -364,29 +364,64 @@
             font-size: 1.4rem; color: var(--ios-blue);
             font-weight: 700; margin-top: 2px;
         }
-        .detail-modal .detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 18px; margin-bottom: 16px; }
+        .detail-modal .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 16px; margin-bottom: 4px; }
         .detail-modal .detail-item {
-            display: flex; justify-content: space-between;
-            font-size: 0.82rem; padding: 6px 0;
-            border-bottom: 0.5px solid var(--separator);
+            background: var(--ios-gray6);
+            border-radius: 6px;
+            padding: 6px 10px;
+            display: flex;
+            flex-direction: column;
         }
-        .detail-modal .detail-item .d-label { color: var(--text-light); }
-        .detail-modal .detail-item .d-value { font-weight: 500; text-align: right; color: var(--text); }
+        .detail-modal .detail-item .d-label {
+            font-size: 0.68rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 1px;
+            font-weight: 500;
+        }
+        .detail-modal .detail-item .d-value {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text);
+            line-height: 1.3;
+        }
 .detail-modal .detail-section-title {
-    font-size: 0.85rem; font-weight: 700; color: var(--ios-blue); 
-    margin: 14px 0 6px 0; padding-bottom: 4px; 
+    font-size: 0.78rem; font-weight: 700; color: var(--ios-blue); 
+    margin: 10px 0 4px 0; padding-bottom: 3px; 
     border-bottom: 1px solid var(--separator);
     text-transform: uppercase; letter-spacing: 0.5px;
 }
         .detail-modal .detail-highlights {
-            background: var(--ios-gray6); padding: 10px 14px;
+            background: var(--ios-gray6); padding: 8px 12px;
             border-radius: var(--radius-md);
-            font-size: 0.82rem; color: var(--text-secondary);
-            line-height: 1.5; margin-bottom: 10px;
+            font-size: 0.8rem; color: var(--text-secondary);
+            line-height: 1.5; margin-bottom: 6px;
         }
         .detail-modal .detail-sales {
             font-size: 0.82rem; color: var(--ios-green);
             font-weight: 500; margin-bottom: 10px;
+        }
+        .detail-modal .detail-text-block {
+            background: var(--ios-gray6);
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+        }
+        .detail-modal .detail-text-block .d-label {
+            font-size: 0.68rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 3px;
+            font-weight: 500;
+        }
+        .detail-modal .detail-text-block .d-value {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
         }
         .detail-close-btn {
             display: block; width: 100%; padding: 10px;
@@ -531,6 +566,7 @@
             .modal { padding: 18px; border-radius: var(--radius-lg); }
             .modal .form-row { flex-direction: column; }
             .detail-modal .detail-grid { grid-template-columns: 1fr; }
+            .detail-modal .detail-text-block { grid-template-columns: 1fr; }
             .compare-bar { padding: 10px 12px; gap: 8px; }
             .compare-bar .selected-tag { padding: 4px 10px; font-size: 0.78rem; }
         }
@@ -1598,88 +1634,104 @@ function openDetailModal(id) {
     const v = vehicles.find(v => v.id === id);
     if (!v) return;
     const content = document.getElementById('detailContent');
-    
-    // 构建参数行 helper
-    function dRow(label, value) {
-        const val = (value !== undefined && value !== null && String(value).trim() !== '' && String(value) !== '-') ? value : '-';
+
+    // Helper: build a compact param item (only if value exists and is not "-")
+    function dItem(label, value) {
+        const val = (value !== undefined && value !== null && String(value).trim() !== '' && String(value) !== '-') ? value : null;
+        if (!val) return '';
         return '<div class="detail-item"><span class="d-label">' + label + '</span><span class="d-value">' + val + '</span></div>';
     }
-    
-    // 构建分类标题 helper
+
+    // Helper: build a full-width text block (only if value exists)
+    function dTextBlock(label, value) {
+        const val = (value !== undefined && value !== null && String(value).trim() !== '' && String(value) !== '-') ? value : null;
+        if (!val) return '';
+        return '<div class="detail-text-block"><div class="d-label">' + label + '</div><div class="d-value">' + val + '</div></div>';
+    }
+
+    // Helper: section title
     function dSection(title) {
         return '<div class="detail-section-title">' + title + '</div>';
     }
-    
+
     var html = '';
-    
-    // 图片区域
+
+    // === Image ===
     html += '<div class="detail-img">' + (v.image ? '<img data-img-url="' + v.image + '" src="about:blank" alt="' + v.name + '" class="vehicle-img-lazy">' : '<span class="no-img">暂无图片</span>') + '</div>';
-    
-    // 基本信息头部
+
+    // === Header ===
     html += '<div class="detail-header">';
     html += '<div class="detail-brand">' + (v.brand || '-') + ' · ' + (v.series || '-') + '系列 · ' + (v.type || '-') + '</div>';
     html += '<div class="detail-name">' + (v.name || '-') + '</div>';
     html += '<div class="detail-price">' + (typeof v.price === "number" ? "¥" + v.price.toLocaleString() : (v.price || "-")) + '</div>';
     if (v.launchDate && v.launchDate !== "-") {
-        html += '<div style="font-size:0.82rem;color:var(--text-light);margin-top:2px;">上市时间: ' + v.launchDate + '</div>';
+        html += '<div style="font-size:0.78rem;color:var(--text-light);margin-top:2px;">上市时间: ' + v.launchDate + '</div>';
     }
     html += '</div>';
-    
+
     // === 动力参数 ===
     html += dSection("动力参数");
-    html += dRow("电机额定功率", (v.ratedPower && v.ratedPower !== "-") ? v.ratedPower + "W" : "-");
-    html += dRow("电机峰值功率", (v.peakPower && v.peakPower !== "-") ? v.peakPower + "W" : "-");
-    html += dRow("电机种类", v.motorType || "-");
-    html += dRow("电机尺寸", v.motorSize || "-");
-    html += dRow("控制器", v.controller || "-");
-    html += dRow("官方极速", (v.topSpeed && v.topSpeed !== "-") ? v.topSpeed + " km/h" : "-");
-    html += dRow("实际极速", v.realTopSpeed || "-");
-    html += dRow("0-25km/h加速", v.accel025 || "-");
-    html += dRow("零百加速", v.accel0100 || "-");
-    html += dRow("骑行模式", v.ridingMode || "-");
-    html += dRow("最大爬坡角度", v.maxGrade || "-");
-    html += dRow("最小转弯半径", v.minTurningRadius || "-");
-    
+    html += '<div class="detail-grid">';
+    html += dItem("额定功率", (v.ratedPower && v.ratedPower !== "-") ? v.ratedPower + "W" : "-");
+    html += dItem("峰值功率", (v.peakPower && v.peakPower !== "-") ? v.peakPower + "W" : "-");
+    html += dItem("电机种类", v.motorType || "-");
+    html += dItem("电机尺寸", v.motorSize || "-");
+    html += dItem("控制器", v.controller || "-");
+    html += dItem("官方极速", (v.topSpeed && v.topSpeed !== "-") ? v.topSpeed + " km/h" : "-");
+    html += dItem("实际极速", v.realTopSpeed || "-");
+    html += dItem("0-25加速", v.accel025 || "-");
+    html += dItem("零百加速", v.accel0100 || "-");
+    html += dItem("骑行模式", v.ridingMode || "-");
+    html += dItem("最大爬坡", v.maxGrade ? v.maxGrade + "°" : "-");
+    html += dItem("转弯半径", v.minTurningRadius || "-");
+    html += '</div>';
+
     // === 续航与电池 ===
     html += dSection("续航与电池");
-    html += dRow("电池类型", v.batteryType || "-");
-    html += dRow("电池容量", v.batteryCapacity || "-");
-    html += dRow("电池规格", v.battery || "-");
-    html += dRow("官方理论续航", (v.range && v.range !== "-") ? v.range + " km" : "-");
-    html += dRow("用户真实续航", v.realRange || "-");
-    html += dRow("充电器规格", v.chargerSpec || "-");
-    html += dRow("充电时间", v.chargeTime || "-");
-    
+    html += '<div class="detail-grid">';
+    html += dItem("电池类型", v.batteryType || "-");
+    html += dItem("电池容量", v.batteryCapacity || "-");
+    html += dItem("电池规格", v.battery || "-");
+    html += dItem("官方续航", (v.range && v.range !== "-") ? v.range + " km" : "-");
+    html += dItem("真实续航", v.realRange || "-");
+    html += dItem("充电器", v.chargerSpec || "-");
+    html += dItem("充电时间", v.chargeTime || "-");
+    html += '</div>';
+
     // === 尺寸与重量 ===
     html += dSection("尺寸与重量");
-    html += dRow("外观尺寸(mm)", v.dimensions || "-");
-    html += dRow("轴距(mm)", (v.wheelbase && v.wheelbase !== "-") ? v.wheelbase + " mm" : "-");
-    html += dRow("整备重量(kg)", v.weight || "-");
-    html += dRow("踏板尺寸(mm)", v.footboardSize || "-");
-    html += dRow("坐垫离地间距(mm)", (v.seatHeight && v.seatHeight !== "-") ? v.seatHeight + " mm" : "-");
-    html += dRow("最小离地间距(mm)", v.minGroundClearance || "-");
-    html += dRow("座桶体积空间(L)", v.bucketVolume || "-");
-    html += dRow("车架材质结构", v.frameMaterial || "-");
-    html += dRow("轮胎类型", v.tireType || "-");
-    html += dRow("前轮胎尺寸", v.frontTire || "-");
-    html += dRow("后轮胎尺寸", v.rearTire || "-");
-    
+    html += '<div class="detail-grid">';
+    html += dItem("外观尺寸", v.dimensions || "-");
+    html += dItem("轴距", v.wheelbase ? v.wheelbase + " mm" : "-");
+    html += dItem("整备重量", v.weight || "-");
+    html += dItem("踏板尺寸", v.footboardSize || "-");
+    html += dItem("坐垫高度", v.seatHeight ? v.seatHeight + " mm" : "-");
+    html += dItem("最小离地", v.minGroundClearance || "-");
+    html += dItem("座桶空间", v.bucketVolume || "-");
+    html += dItem("车架材质", v.frameMaterial || "-");
+    html += dItem("轮胎类型", v.tireType || "-");
+    html += dItem("前轮胎", v.frontTire || "-");
+    html += dItem("后轮胎", v.rearTire || "-");
+    html += '</div>';
+
     // === 制动与悬挂 ===
     html += dSection("制动与悬挂");
-    html += dRow("制动系统", v.brakeType || "-");
-    html += dRow("ABS & CBS", v.absCbs || "-");
-    html += dRow("TCS", v.tcs || "-");
-    html += dRow("前减震", v.frontSuspension || "-");
-    html += dRow("后减震", v.rearSuspension || "-");
-    
-    // === 智能与配置 ===
+    html += '<div class="detail-grid">';
+    html += dItem("制动系统", v.brakeType || "-");
+    html += dItem("ABS/CBS", v.absCbs || "-");
+    html += dItem("TCS", v.tcs || "-");
+    html += dItem("前减震", v.frontSuspension || "-");
+    html += dItem("后减震", v.rearSuspension || "-");
+    html += '</div>';
+
+    // === 智能与配置 (long text fields use full-width blocks) ===
     html += dSection("智能与配置");
-    html += dRow("仪表类型", v.instrumentType || "-");
-    html += dRow("灯光", v.lighting || "-");
-    html += dRow("智能化功能", v.smartFeatures || "-");
-    html += dRow("认证型号", v.certModel || "-");
-    html += dRow("其他配置", v.otherFeatures || "-");
-    
+    html += dTextBlock("仪表", v.instrumentType || "-");
+    html += dTextBlock("灯光", v.lighting || "-");
+    html += dTextBlock("智能化功能", v.smartFeatures || "-");
+    html += dTextBlock("认证型号", v.certModel || "-");
+    html += dTextBlock("其他配置", v.otherFeatures || "-");
+
     // === 卖点与销售 ===
     if (v.highlights || v.salesInfo) {
         html += dSection("卖点与销售");
@@ -1690,13 +1742,13 @@ function openDetailModal(id) {
             html += '<div class="detail-sales">' + (v.salesInfo.startsWith("📊") ? "" : "📊 ") + v.salesInfo + '</div>';
         }
     }
-    
+
     html += '<button class="detail-close-btn" onclick="closeDetailModal()">关闭</button>';
-    
+
     content.innerHTML = html;
     document.getElementById('detailModal').classList.add('active');
     document.body.style.overflow = 'hidden';
-    
+
     // 懒加载详情图片
     var detailImg = document.querySelector('#detailContent .vehicle-img-lazy');
     if (detailImg) {
