@@ -152,7 +152,7 @@
         }
         .sort-btn .arrow { font-size: 9px; margin-left: 2px; }
         .vehicle-list {
-            display: grid; grid-template-columns: repeat(4, 1fr);
+            display: grid; grid-template-columns: repeat(5, 1fr);
             gap: 14px; margin: 0 auto 24px;
         }
         .vehicle-card {
@@ -299,7 +299,7 @@
         .modal {
             background: var(--card-bg); border-radius: var(--radius-xl);
             width: 100%; max-width: 600px; max-height: 85vh;
-            overflow-y: auto; padding: 24px;
+            overflow-y: auto; padding: 28px 32px;
             box-shadow: var(--shadow-xl);
             transform: scale(0.95) translateY(10px);
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -341,7 +341,7 @@
         .modal-actions .save-btn:hover { background: #0066D6; }
         .modal-actions .cancel-btn { background: var(--ios-gray5); color: var(--text-secondary); }
         .modal-actions .cancel-btn:hover { background: var(--ios-gray4); }
-        .detail-modal { max-width: 520px; }
+        .detail-modal { max-width: 920px; }
         .detail-modal .detail-img {
             width: 100%; aspect-ratio: 16/10;
             background: var(--ios-gray6);
@@ -364,10 +364,7 @@
             font-size: 1.4rem; color: var(--ios-blue);
             font-weight: 700; margin-top: 2px;
         }
-        .detail-modal .detail-grid {
-            display: grid; grid-template-columns: 1fr 1fr;
-            gap: 2px 16px; margin-bottom: 14px;
-        }
+        .detail-modal .detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 18px; margin-bottom: 16px; }
         .detail-modal .detail-item {
             display: flex; justify-content: space-between;
             font-size: 0.82rem; padding: 6px 0;
@@ -375,6 +372,12 @@
         }
         .detail-modal .detail-item .d-label { color: var(--text-light); }
         .detail-modal .detail-item .d-value { font-weight: 500; text-align: right; color: var(--text); }
+.detail-modal .detail-section-title {
+    font-size: 0.85rem; font-weight: 700; color: var(--ios-blue); 
+    margin: 14px 0 6px 0; padding-bottom: 4px; 
+    border-bottom: 1px solid var(--separator);
+    text-transform: uppercase; letter-spacing: 0.5px;
+}
         .detail-modal .detail-highlights {
             background: var(--ios-gray6); padding: 10px 14px;
             border-radius: var(--radius-md);
@@ -632,6 +635,54 @@
                 <div class="form-group"><label>仪表类型</label><input list="addInstrumentTypeList" id="addInstrumentType" placeholder="选择或输入仪表类型"><datalist id="addInstrumentTypeList"><option value="LCD液晶仪表"><option value="5寸TFT彩屏"><option value="6.2寸TFT彩屏"><option value="6.86寸TFT超宽彩屏"><option value="7寸触控屏"><option value="4.3寸TFT屏"><option value="指针仪表"><option value="LED数码仪表"></datalist></div>
                 <div class="form-group full"><label>智能化功能</label><input type="text" id="addSmartFeatures" placeholder="如：无感解锁、OTA升级、APP远程控制、导航投屏"></div>
             </div>
+                        <div class="form-row">
+                <div class="form-group"><label>认证型号</label><input type="text" id="addCertModel" placeholder="如：CDT-XXX"></div>
+                <div class="form-group"><label>整备重量(kg)</label><input type="number" id="addWeight" placeholder="如：65"></div>
+                <div class="form-group"><label>踏板尺寸(mm)</label><input type="text" id="addFootboardSize" placeholder="如：520×130"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>最小离地间距(mm)</label><input type="number" id="addMinGroundClearance" placeholder="如：120"></div>
+                <div class="form-group"><label>座桶体积(L)</label><input type="number" id="addBucketVolume" placeholder="如：15"></div>
+                <div class="form-group"><label>车架材质</label><input type="text" id="addFrameMaterial" placeholder="如：钢制车架"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>轮胎类型</label><input type="text" id="addTireType" placeholder="如：真空胎"></div>
+                <div class="form-group"><label>前轮胎尺寸</label><input type="text" id="addFrontTire" placeholder="如：90/90-10"></div>
+                <div class="form-group"><label>后轮胎尺寸</label><input type="text" id="addRearTire" placeholder="如：100/90-10"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>电机尺寸</label><input type="text" id="addMotorSize" placeholder="如：12寸"></div>
+                <div class="form-group"><label>控制器</label><input type="text" id="addController" placeholder="如：九号自研控制器"></div>
+                <div class="form-group"><label>实际极速(km/h)</label><input type="text" id="addRealTopSpeed" placeholder="如：68"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>0-25加速(s)</label><input type="text" id="addAccel025" placeholder="如：3.5"></div>
+                <div class="form-group"><label>零百加速(s)</label><input type="text" id="addAccel0100" placeholder="如：4.5"></div>
+                <div class="form-group"><label>骑行模式</label><input type="text" id="addRidingMode" placeholder="如：标准/运动/节能"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>最大爬坡角度(°)</label><input type="number" id="addMaxGrade" placeholder="如：15"></div>
+                <div class="form-group"><label>最小转弯半径(m)</label><input type="number" id="addMinTurningRadius" placeholder="如：1.8"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>电池类型</label><input type="text" id="addBatteryType" placeholder="如：铅酸/锂电"></div>
+                <div class="form-group"><label>电池容量</label><input type="text" id="addBatteryCapacity" placeholder="如：72V32Ah"></div>
+                <div class="form-group"><label>用户真实续航(km)</label><input type="text" id="addRealRange" placeholder="如：60-70"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>充电器规格</label><input type="text" id="addChargerSpec" placeholder="如：72V3A"></div>
+                <div class="form-group"><label>充电时间(h)</label><input type="number" id="addChargeTime" placeholder="如：6-8"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>ABS & CBS</label><input type="text" id="addAbsCbs" placeholder="如：前轮ABS"></div>
+                <div class="form-group"><label>TCS</label><input type="text" id="addTcs" placeholder="如：标配"></div>
+                <div class="form-group"><label>前减震</label><input type="text" id="addFrontSuspension" placeholder="如：液压减震"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>后减震</label><input type="text" id="addRearSuspension" placeholder="如：液压减震"></div>
+                <div class="form-group"><label>灯光</label><input type="text" id="addLighting" placeholder="如：全LED"></div>
+                <div class="form-group"><label>其他配置</label><input type="text" id="addOtherFeatures" placeholder="如：USB充电口"></div>
+            </div>
             <div class="form-group full"><label>核心卖点</label><textarea id="addHighlights" rows="2" placeholder="如：搭载凌波OS系统，支持无感解锁、OTA升级"></textarea></div>
             <div class="form-group full"><label>车型图片</label><div class="img-upload-area" id="addImgArea"><span class="upload-text">点击或拖拽上传车型图片</span></div><input type="file" id="addImgInput" accept="image/*" style="display:none"></div>
             <br><button type="submit" class="submit-btn">添加车型</button>
@@ -691,6 +742,54 @@
             <div class="form-row">
                 <div class="form-group"><label>仪表类型</label><input list="editInstrumentTypeList" id="editInstrumentType" placeholder="选择或输入仪表类型"><datalist id="editInstrumentTypeList"><option value="LCD液晶仪表"><option value="5寸TFT彩屏"><option value="6.2寸TFT彩屏"><option value="6.86寸TFT超宽彩屏"><option value="7寸触控屏"><option value="4.3寸TFT屏"><option value="指针仪表"><option value="LED数码仪表"></datalist></div>
                 <div class="form-group full"><label>智能化功能</label><input type="text" id="editSmartFeatures" placeholder="如：无感解锁、OTA升级、APP远程控制、导航投屏"></div>
+            </div>
+                        <div class="form-row">
+                <div class="form-group"><label>认证型号</label><input type="text" id="editCertModel" placeholder="如：CDT-XXX"></div>
+                <div class="form-group"><label>整备重量(kg)</label><input type="number" id="editWeight" placeholder="如：65"></div>
+                <div class="form-group"><label>踏板尺寸(mm)</label><input type="text" id="editFootboardSize" placeholder="如：520×130"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>最小离地间距(mm)</label><input type="number" id="editMinGroundClearance" placeholder="如：120"></div>
+                <div class="form-group"><label>座桶体积(L)</label><input type="number" id="editBucketVolume" placeholder="如：15"></div>
+                <div class="form-group"><label>车架材质</label><input type="text" id="editFrameMaterial" placeholder="如：钢制车架"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>轮胎类型</label><input type="text" id="editTireType" placeholder="如：真空胎"></div>
+                <div class="form-group"><label>前轮胎尺寸</label><input type="text" id="editFrontTire" placeholder="如：90/90-10"></div>
+                <div class="form-group"><label>后轮胎尺寸</label><input type="text" id="editRearTire" placeholder="如：100/90-10"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>电机尺寸</label><input type="text" id="editMotorSize" placeholder="如：12寸"></div>
+                <div class="form-group"><label>控制器</label><input type="text" id="editController" placeholder="如：九号自研控制器"></div>
+                <div class="form-group"><label>实际极速(km/h)</label><input type="text" id="editRealTopSpeed" placeholder="如：68"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>0-25加速(s)</label><input type="text" id="editAccel025" placeholder="如：3.5"></div>
+                <div class="form-group"><label>零百加速(s)</label><input type="text" id="editAccel0100" placeholder="如：4.5"></div>
+                <div class="form-group"><label>骑行模式</label><input type="text" id="editRidingMode" placeholder="如：标准/运动/节能"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>最大爬坡角度(°)</label><input type="number" id="editMaxGrade" placeholder="如：15"></div>
+                <div class="form-group"><label>最小转弯半径(m)</label><input type="number" id="editMinTurningRadius" placeholder="如：1.8"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>电池类型</label><input type="text" id="editBatteryType" placeholder="如：铅酸/锂电"></div>
+                <div class="form-group"><label>电池容量</label><input type="text" id="editBatteryCapacity" placeholder="如：72V32Ah"></div>
+                <div class="form-group"><label>用户真实续航(km)</label><input type="text" id="editRealRange" placeholder="如：60-70"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>充电器规格</label><input type="text" id="editChargerSpec" placeholder="如：72V3A"></div>
+                <div class="form-group"><label>充电时间(h)</label><input type="number" id="editChargeTime" placeholder="如：6-8"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>ABS & CBS</label><input type="text" id="editAbsCbs" placeholder="如：前轮ABS"></div>
+                <div class="form-group"><label>TCS</label><input type="text" id="editTcs" placeholder="如：标配"></div>
+                <div class="form-group"><label>前减震</label><input type="text" id="editFrontSuspension" placeholder="如：液压减震"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>后减震</label><input type="text" id="editRearSuspension" placeholder="如：液压减震"></div>
+                <div class="form-group"><label>灯光</label><input type="text" id="editLighting" placeholder="如：全LED"></div>
+                <div class="form-group"><label>其他配置</label><input type="text" id="editOtherFeatures" placeholder="如：USB充电口"></div>
             </div>
             <div class="form-group full"><label>核心卖点</label><textarea id="editHighlights" rows="2"></textarea></div>
             <div class="form-group full"><label>车型图片</label><div class="img-upload-area" id="editImgArea"><span class="upload-text">点击或拖拽上传车型图片（替换当前图片）</span></div><input type="file" id="editImgInput" accept="image/*" style="display:none"></div>
@@ -1396,37 +1495,109 @@ function openDetailModal(id) {
     const v = vehicles.find(v => v.id === id);
     if (!v) return;
     const content = document.getElementById('detailContent');
-    content.innerHTML = `
-        <div class="detail-img">${v.image ? `<img data-img-url="${v.image}" src="about:blank" alt="${v.name}" class="vehicle-img-lazy">` : `<span class="no-img">暂无图片</span>`}</div>
-        <div class="detail-header">
-            <div class="detail-brand">${v.brand} · ${v.series}系列 · ${v.type}</div>
-            <div class="detail-name">${v.name}</div>
-            <div class="detail-price">${typeof v.price === 'number' ? '¥' + v.price.toLocaleString() : (v.price || '-')}</div>
-        </div>
-        <div class="detail-grid">
-            <div class="detail-item"><span class="d-label">额定功率</span><span class="d-value">${v.ratedPower ? v.ratedPower + 'W' : '-'}</span></div>
-            <div class="detail-item"><span class="d-label">峰值功率</span><span class="d-value">${v.peakPower ? v.peakPower + 'W' : '-'}</span></div>
-            <div class="detail-item"><span class="d-label">电机种类</span><span class="d-value">${v.motorType || '-'}</span></div>
-            <div class="detail-item"><span class="d-label">极速</span><span class="d-value">${v.topSpeed ? v.topSpeed + ' km/h' : '-'}</span></div>
-            <div class="detail-item"><span class="d-label">续航里程</span><span class="d-value">${v.range ? v.range + ' km' : '-'}</span></div>
-            <div class="detail-item"><span class="d-label">电池规格</span><span class="d-value">${v.battery || '-'}</span></div>
-            <div class="detail-item"><span class="d-label">整车尺寸</span><span class="d-value">${v.dimensions || '-'}</span></div>
-            <div class="detail-item"><span class="d-label">轴距</span><span class="d-value">${v.wheelbase ? v.wheelbase + ' mm' : '-'}</span></div>
-            <div class="detail-item"><span class="d-label">坐高</span><span class="d-value">${v.seatHeight ? v.seatHeight + ' mm' : '-'}</span></div>
-            <div class="detail-item"><span class="d-label">刹车类型</span><span class="d-value">${v.brakeType || '-'}</span></div>
-            <div class="detail-item"><span class="d-label">仪表类型</span><span class="d-value">${v.instrumentType || '-'}</span></div>
-            <div class="detail-item"><span class="d-label">智能化功能</span><span class="d-value">${v.smartFeatures || '-'}</span></div>
-            <div class="detail-item"><span class="d-label">上市时间</span><span class="d-value">${v.launchDate ? v.launchDate : '-'}</span></div>
-        </div>
-        ${v.highlights ? `<div class="detail-highlights">💡 ${v.highlights}</div>` : ''}
-        ${v.salesInfo ? `<div class="detail-sales">📊 ${v.salesInfo}</div>` : ''}
-        <button class="detail-close-btn" onclick="closeDetailModal()">关闭</button>`;
+    
+    // 构建参数行 helper
+    function dRow(label, value) {
+        const val = (value !== undefined && value !== null && String(value).trim() !== '' && String(value) !== '-') ? value : '-';
+        return '<div class="detail-item"><span class="d-label">' + label + '</span><span class="d-value">' + val + '</span></div>';
+    }
+    
+    // 构建分类标题 helper
+    function dSection(title) {
+        return '<div class="detail-section-title">' + title + '</div>';
+    }
+    
+    var html = '';
+    
+    // 图片区域
+    html += '<div class="detail-img">' + (v.image ? '<img data-img-url="' + v.image + '" src="about:blank" alt="' + v.name + '" class="vehicle-img-lazy">' : '<span class="no-img">暂无图片</span>') + '</div>';
+    
+    // 基本信息头部
+    html += '<div class="detail-header">';
+    html += '<div class="detail-brand">' + (v.brand || '-') + ' · ' + (v.series || '-') + '系列 · ' + (v.type || '-') + '</div>';
+    html += '<div class="detail-name">' + (v.name || '-') + '</div>';
+    html += '<div class="detail-price">' + (typeof v.price === "number" ? "¥" + v.price.toLocaleString() : (v.price || "-")) + '</div>';
+    if (v.launchDate && v.launchDate !== "-") {
+        html += '<div style="font-size:0.82rem;color:var(--text-light);margin-top:2px;">上市时间: ' + v.launchDate + '</div>';
+    }
+    html += '</div>';
+    
+    // === 动力参数 ===
+    html += dSection("动力参数");
+    html += dRow("电机额定功率", (v.ratedPower && v.ratedPower !== "-") ? v.ratedPower + "W" : "-");
+    html += dRow("电机峰值功率", (v.peakPower && v.peakPower !== "-") ? v.peakPower + "W" : "-");
+    html += dRow("电机种类", v.motorType || "-");
+    html += dRow("电机尺寸", v.motorSize || "-");
+    html += dRow("控制器", v.controller || "-");
+    html += dRow("官方极速", (v.topSpeed && v.topSpeed !== "-") ? v.topSpeed + " km/h" : "-");
+    html += dRow("实际极速", v.realTopSpeed || "-");
+    html += dRow("0-25km/h加速", v.accel025 || "-");
+    html += dRow("零百加速", v.accel0100 || "-");
+    html += dRow("骑行模式", v.ridingMode || "-");
+    html += dRow("最大爬坡角度", v.maxGrade || "-");
+    html += dRow("最小转弯半径", v.minTurningRadius || "-");
+    
+    // === 续航与电池 ===
+    html += dSection("续航与电池");
+    html += dRow("电池类型", v.batteryType || "-");
+    html += dRow("电池容量", v.batteryCapacity || "-");
+    html += dRow("电池规格", v.battery || "-");
+    html += dRow("官方理论续航", (v.range && v.range !== "-") ? v.range + " km" : "-");
+    html += dRow("用户真实续航", v.realRange || "-");
+    html += dRow("充电器规格", v.chargerSpec || "-");
+    html += dRow("充电时间", v.chargeTime || "-");
+    
+    // === 尺寸与重量 ===
+    html += dSection("尺寸与重量");
+    html += dRow("外观尺寸(mm)", v.dimensions || "-");
+    html += dRow("轴距(mm)", (v.wheelbase && v.wheelbase !== "-") ? v.wheelbase + " mm" : "-");
+    html += dRow("整备重量(kg)", v.weight || "-");
+    html += dRow("踏板尺寸(mm)", v.footboardSize || "-");
+    html += dRow("坐垫离地间距(mm)", (v.seatHeight && v.seatHeight !== "-") ? v.seatHeight + " mm" : "-");
+    html += dRow("最小离地间距(mm)", v.minGroundClearance || "-");
+    html += dRow("座桶体积空间(L)", v.bucketVolume || "-");
+    html += dRow("车架材质结构", v.frameMaterial || "-");
+    html += dRow("轮胎类型", v.tireType || "-");
+    html += dRow("前轮胎尺寸", v.frontTire || "-");
+    html += dRow("后轮胎尺寸", v.rearTire || "-");
+    
+    // === 制动与悬挂 ===
+    html += dSection("制动与悬挂");
+    html += dRow("制动系统", v.brakeType || "-");
+    html += dRow("ABS & CBS", v.absCbs || "-");
+    html += dRow("TCS", v.tcs || "-");
+    html += dRow("前减震", v.frontSuspension || "-");
+    html += dRow("后减震", v.rearSuspension || "-");
+    
+    // === 智能与配置 ===
+    html += dSection("智能与配置");
+    html += dRow("仪表类型", v.instrumentType || "-");
+    html += dRow("灯光", v.lighting || "-");
+    html += dRow("智能化功能", v.smartFeatures || "-");
+    html += dRow("认证型号", v.certModel || "-");
+    html += dRow("其他配置", v.otherFeatures || "-");
+    
+    // === 卖点与销售 ===
+    if (v.highlights || v.salesInfo) {
+        html += dSection("卖点与销售");
+        if (v.highlights) {
+            html += '<div class="detail-highlights">' + (v.highlights.startsWith("💡") ? "" : "💡 ") + v.highlights + '</div>';
+        }
+        if (v.salesInfo) {
+            html += '<div class="detail-sales">' + (v.salesInfo.startsWith("📊") ? "" : "📊 ") + v.salesInfo + '</div>';
+        }
+    }
+    
+    html += '<button class="detail-close-btn" onclick="closeDetailModal()">关闭</button>';
+    
+    content.innerHTML = html;
     document.getElementById('detailModal').classList.add('active');
     document.body.style.overflow = 'hidden';
+    
     // 懒加载详情图片
-    const detailImg = document.querySelector('#detailContent .vehicle-img-lazy');
+    var detailImg = document.querySelector('#detailContent .vehicle-img-lazy');
     if (detailImg) {
-        const url = detailImg.getAttribute('data-img-url');
+        var url = detailImg.getAttribute('data-img-url');
         if (url) tryLoadImageWithAuth(detailImg, url);
     }
 }
@@ -1468,6 +1639,35 @@ function openEditModal(id) {
     document.getElementById('editHighlights').value = v.highlights || '';
     document.getElementById('editSales').value = v.salesInfo || '';
     document.getElementById('editLaunchDate').value = v.launchDate || '';
+    document.getElementById('editCertModel').value = v.certModel || '';
+    document.getElementById('editWeight').value = v.weight || '';
+    document.getElementById('editFootboardSize').value = v.footboardSize || '';
+    document.getElementById('editMinGroundClearance').value = v.minGroundClearance || '';
+    document.getElementById('editBucketVolume').value = v.bucketVolume || '';
+    document.getElementById('editFrameMaterial').value = v.frameMaterial || '';
+    document.getElementById('editTireType').value = v.tireType || '';
+    document.getElementById('editFrontTire').value = v.frontTire || '';
+    document.getElementById('editRearTire').value = v.rearTire || '';
+    document.getElementById('editMotorSize').value = v.motorSize || '';
+    document.getElementById('editController').value = v.controller || '';
+    document.getElementById('editRealTopSpeed').value = v.realTopSpeed || '';
+    document.getElementById('editAccel025').value = v.accel025 || '';
+    document.getElementById('editAccel0100').value = v.accel0100 || '';
+    document.getElementById('editRidingMode').value = v.ridingMode || '';
+    document.getElementById('editMaxGrade').value = v.maxGrade || '';
+    document.getElementById('editMinTurningRadius').value = v.minTurningRadius || '';
+    document.getElementById('editBatteryType').value = v.batteryType || '';
+    document.getElementById('editBatteryCapacity').value = v.batteryCapacity || '';
+    document.getElementById('editRealRange').value = v.realRange || '';
+    document.getElementById('editChargerSpec').value = v.chargerSpec || '';
+    document.getElementById('editChargeTime').value = v.chargeTime || '';
+    document.getElementById('editAbsCbs').value = v.absCbs || '';
+    document.getElementById('editTcs').value = v.tcs || '';
+    document.getElementById('editFrontSuspension').value = v.frontSuspension || '';
+    document.getElementById('editRearSuspension').value = v.rearSuspension || '';
+    document.getElementById('editLighting').value = v.lighting || '';
+    document.getElementById('editOtherFeatures').value = v.otherFeatures || '';
+
     document.getElementById('editSubtitle').textContent = `正在编辑：${v.brand} ${v.name}`;
     const editSeries = document.getElementById('editSeries');
     const brandSeries = [...new Set(vehicles.filter(vv => vv.brand === v.brand).map(vv => vv.series))];
@@ -1559,6 +1759,35 @@ document.getElementById('editForm').addEventListener('submit', async function(e)
     v.highlights = document.getElementById('editHighlights').value || '';
     v.salesInfo = document.getElementById('editSales').value || '';
     v.launchDate = document.getElementById('editLaunchDate').value || null;
+    v.certModel = document.getElementById('editCertModel').value || null;
+    v.weight = document.getElementById('editWeight').value ? parseInt(document.getElementById('editWeight').value) : null;
+    v.footboardSize = document.getElementById('editFootboardSize').value || null;
+    v.minGroundClearance = document.getElementById('editMinGroundClearance').value ? parseInt(document.getElementById('editMinGroundClearance').value) : null;
+    v.bucketVolume = document.getElementById('editBucketVolume').value ? parseInt(document.getElementById('editBucketVolume').value) : null;
+    v.frameMaterial = document.getElementById('editFrameMaterial').value || null;
+    v.tireType = document.getElementById('editTireType').value || null;
+    v.frontTire = document.getElementById('editFrontTire').value || null;
+    v.rearTire = document.getElementById('editRearTire').value || null;
+    v.motorSize = document.getElementById('editMotorSize').value || null;
+    v.controller = document.getElementById('editController').value || null;
+    v.realTopSpeed = document.getElementById('editRealTopSpeed').value || null;
+    v.accel025 = document.getElementById('editAccel025').value || null;
+    v.accel0100 = document.getElementById('editAccel0100').value || null;
+    v.ridingMode = document.getElementById('editRidingMode').value || null;
+    v.maxGrade = document.getElementById('editMaxGrade').value ? parseInt(document.getElementById('editMaxGrade').value) : null;
+    v.minTurningRadius = document.getElementById('editMinTurningRadius').value ? parseFloat(document.getElementById('editMinTurningRadius').value) : null;
+    v.batteryType = document.getElementById('editBatteryType').value || null;
+    v.batteryCapacity = document.getElementById('editBatteryCapacity').value || null;
+    v.realRange = document.getElementById('editRealRange').value || null;
+    v.chargerSpec = document.getElementById('editChargerSpec').value || null;
+    v.chargeTime = document.getElementById('editChargeTime').value ? parseInt(document.getElementById('editChargeTime').value) : null;
+    v.absCbs = document.getElementById('editAbsCbs').value || null;
+    v.tcs = document.getElementById('editTcs').value || null;
+    v.frontSuspension = document.getElementById('editFrontSuspension').value || null;
+    v.rearSuspension = document.getElementById('editRearSuspension').value || null;
+    v.lighting = document.getElementById('editLighting').value || null;
+    v.otherFeatures = document.getElementById('editOtherFeatures').value || null;
+
     // 使用编辑图片数据
     v.image = editFormImageData || '';
     closeEditModal();
@@ -1687,6 +1916,35 @@ document.getElementById('addForm').addEventListener('submit', async function(e) 
         highlights: document.getElementById('addHighlights').value || '',
         salesInfo: document.getElementById('addSales').value || '',
         launchDate: document.getElementById('addLaunchDate').value || null,
+        certModel: document.getElementById('addCertModel').value || null,
+        weight: document.getElementById('addWeight').value ? parseInt(document.getElementById('addWeight').value) : null,
+        footboardSize: document.getElementById('addFootboardSize').value || null,
+        minGroundClearance: document.getElementById('addMinGroundClearance').value ? parseInt(document.getElementById('addMinGroundClearance').value) : null,
+        bucketVolume: document.getElementById('addBucketVolume').value ? parseInt(document.getElementById('addBucketVolume').value) : null,
+        frameMaterial: document.getElementById('addFrameMaterial').value || null,
+        tireType: document.getElementById('addTireType').value || null,
+        frontTire: document.getElementById('addFrontTire').value || null,
+        rearTire: document.getElementById('addRearTire').value || null,
+        motorSize: document.getElementById('addMotorSize').value || null,
+        controller: document.getElementById('addController').value || null,
+        realTopSpeed: document.getElementById('addRealTopSpeed').value || null,
+        accel025: document.getElementById('addAccel025').value || null,
+        accel0100: document.getElementById('addAccel0100').value || null,
+        ridingMode: document.getElementById('addRidingMode').value || null,
+        maxGrade: document.getElementById('addMaxGrade').value ? parseInt(document.getElementById('addMaxGrade').value) : null,
+        minTurningRadius: document.getElementById('addMinTurningRadius').value ? parseFloat(document.getElementById('addMinTurningRadius').value) : null,
+        batteryType: document.getElementById('addBatteryType').value || null,
+        batteryCapacity: document.getElementById('addBatteryCapacity').value || null,
+        realRange: document.getElementById('addRealRange').value || null,
+        chargerSpec: document.getElementById('addChargerSpec').value || null,
+        chargeTime: document.getElementById('addChargeTime').value ? parseInt(document.getElementById('addChargeTime').value) : null,
+        absCbs: document.getElementById('addAbsCbs').value || null,
+        tcs: document.getElementById('addTcs').value || null,
+        frontSuspension: document.getElementById('addFrontSuspension').value || null,
+        rearSuspension: document.getElementById('addRearSuspension').value || null,
+        lighting: document.getElementById('addLighting').value || null,
+        otherFeatures: document.getElementById('addOtherFeatures').value || null,
+
         image: addFormImageData || ''
     };
     vehicles.push(newVehicle);
