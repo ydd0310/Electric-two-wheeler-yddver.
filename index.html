@@ -1023,7 +1023,7 @@ async function syncToGitHub(showMsg) {
             await ghSaveData(vehicles);
             updateSyncStatus('connected', '已同步');
             // 同时缓存到 localStorage
-            localStorage.setItem('vehicleDataCache', JSON.stringify(vehicles.map(v => ({...v, series: normSeries(v.series)}))));
+            localStorage.setItem('vehicleDataCache', JSON.stringify(vehicles));
             if (showMsg) alert('✅ 数据已同步到 GitHub！');
         } catch(e) {
             updateSyncStatus('error', '同步失败');
@@ -1122,7 +1122,7 @@ async function saveSettings() {
         if (data && data.length > 0) {
             vehicles = normalizeVehiclesArray(data);
             updateSyncStatus('connected', '已同步');
-            localStorage.setItem('vehicleDataCache', JSON.stringify(vehicles.map(v => ({...v, series: normSeries(v.series)}))));
+            localStorage.setItem('vehicleDataCache', JSON.stringify(vehicles));
         }
         hideLoading();
         refreshSeriesFilters();
@@ -1254,7 +1254,7 @@ const SERIES_NORMALIZE = {
 function normalizeSeries(rawSeries) {
     if (!rawSeries) return '-';
     const result = SERIES_NORMALIZE[rawSeries.trim()] || rawSeries.trim();
-    // 归一化系列名称
+    // 使用 normSeries 确保彻底去掉"系列"
     return normSeries(result);
 }
 
@@ -1765,7 +1765,7 @@ document.getElementById('editForm').addEventListener('submit', async function(e)
     if (!v) return;
     v.brand = document.getElementById('editBrand').value;
     v.name = document.getElementById('editName').value;
-    v.series = normSeries(document.getElementById('editSeries').value);
+    v.series = normalizeSeries(document.getElementById('editSeries').value);
     v.type = document.getElementById('editType').value;
     v.price = parseInt(document.getElementById('editPrice').value);
     v.ratedPower = parseInt(document.getElementById('editRatedPower').value) || null;
@@ -1854,7 +1854,6 @@ document.getElementById('addNewSeriesBtn').addEventListener('click', function() 
         const seriesName = name.trim().toUpperCase();
         const cleanedSeriesName = normSeries(seriesName);
         if (!customSeries.includes(cleanedSeriesName) && !getAllSeries().includes(cleanedSeriesName)) {
-
             customSeries.push(cleanedSeriesName);
             refreshSeriesFilters();
             document.getElementById('addSeries').value = cleanedSeriesName;
@@ -1886,7 +1885,7 @@ document.getElementById('addForm').addEventListener('submit', async function(e) 
     const newVehicle = {
         id: newId,
         brand: document.getElementById('addBrand').value,
-        series: normSeries(document.getElementById('addSeries').value),
+        series: normalizeSeries(document.getElementById('addSeries').value),
         name: document.getElementById('addName').value,
         price: parseInt(document.getElementById('addPrice').value),
         type: document.getElementById('addType').value,
@@ -1968,7 +1967,7 @@ async function init() {
                 updateSyncStatus('connected', '已加载默认数据');
             }
             // 缓存到 localStorage
-            localStorage.setItem('vehicleDataCache', JSON.stringify(vehicles.map(v => ({...v, series: normSeries(v.series)}))));
+            localStorage.setItem('vehicleDataCache', JSON.stringify(vehicles));
         } catch(e) {
             console.warn('GitHub 加载失败，使用本地缓存', e);
             updateSyncStatus('error', '离线模式');
@@ -2018,7 +2017,7 @@ async function init() {
         }
         editSeries.innerHTML = brandSeries.map(s => `<option value="${normSeries(s)}">${normSeries(s)} 系列</option>`).join('');
     });
-    // 清洗数据并构建UI
+    // 先清洗数据，再构建UI（防止系列名带"系列"导致显示"XX系列 系列"）
     normalizeVehiclesArray(vehicles);
     refreshSeriesFilters();
     renderVehicles();
