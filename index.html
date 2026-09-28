@@ -608,7 +608,7 @@
         </div>
         <div class="filter-group">
             <label>车型类型</label>
-            <select id="typeFilter"><option value="all">全部类型</option><option value="电动摩托车">电动摩托车</option><option value="电轻摩">电轻摩</option><option value="新国标电动自行车">新国标电动自行车</option></select>
+            <select id="typeFilter"><option value="all">全部类型</option><option value="电自">电自</option><option value="电摩">电摩</option><option value="电轻摩">电轻摩</option></select>
         </div>
         <div class="filter-group">
             <label>搜索</label>
@@ -636,7 +636,7 @@
 
     <section class="add-section">
         <h2>➕ 添加新车型</h2>
-        <p class="add-tip">填写车型信息后提交即可添加到列表并同步到云端。新系列名称会自动注册到系列筛选器中。</p>
+        <p class="add-tip">填写车型信息后提交即可添加到列表并同步到云端。新系列会在添加车型并保存后自动进入系列筛选器。</p>
         <form id="addForm">
             <div class="form-row">
                 <div class="form-group"><label>所属品牌</label><input list="brandDatalistAdd" id="addBrand" required placeholder="选择或输入品牌名称"><datalist id="brandDatalistAdd"></datalist></div>
@@ -644,7 +644,7 @@
             </div>
             <div class="form-row">
                 <div class="form-group"><label>所属系列</label><div class="new-series-row"><select id="addSeries"></select><button type="button" id="addNewSeriesBtn" title="添加全新系列">+ 新系列</button></div></div>
-                <div class="form-group"><label>车型类型</label><select id="addType"><option value="电动摩托车">电动摩托车</option><option value="电轻摩">电轻摩</option><option value="新国标电动自行车">新国标电动自行车</option></select></div>
+                <div class="form-group"><label>车型类型</label><select id="addType"><option value="电自">电自</option><option value="电摩">电摩</option><option value="电轻摩">电轻摩</option></select></div>
             </div>
             <div class="form-row">
                 <div class="form-group"><label>售价（元）</label><input type="number" id="addPrice" placeholder="如：5999" required></div>
@@ -720,7 +720,7 @@
                 <div class="form-group"><label>其他配置</label><input type="text" id="addOtherFeatures" placeholder="如：USB充电口"></div>
             </div>
             <div class="form-group full"><label>核心卖点</label><textarea id="addHighlights" rows="2" placeholder="如：搭载凌波OS系统，支持无感解锁、OTA升级"></textarea></div>
-            <div class="form-group full"><label>图片链接</label><input type="text" id="addImage" placeholder="https://用户名.github.io/仓库名/images/1.png 或直接写 1.png" /><div id="addImgPreview" style="margin-top:8px;display:none;"><img id="addImgPreviewImg" src="" alt="预览" style="max-width:200px;max-height:150px;border-radius:6px;border:1px solid #ddd;" /></div></div>
+            <div class="form-group full"><label>图片链接</label><input type="text" id="addImage" placeholder="https://raw.githubusercontent.com/用户名/仓库名/images/1.png 或直接写 1.png" /><div id="addImgPreview" style="margin-top:8px;display:none;"><img id="addImgPreviewImg" src="" alt="预览" style="max-width:200px;max-height:150px;border-radius:6px;border:1px solid #ddd;" /></div></div>
             <br><button type="submit" class="submit-btn">添加车型</button>
         </form>
     </section>
@@ -752,7 +752,7 @@
             </div>
             <div class="form-row">
                 <div class="form-group"><label>所属系列</label><select id="editSeries"></select></div>
-                <div class="form-group"><label>车型类型</label><select id="editType"><option value="电动摩托车">电动摩托车</option><option value="电轻摩">电轻摩</option><option value="新国标电动自行车">新国标电动自行车</option></select></div>
+                <div class="form-group"><label>车型类型</label><select id="editType"><option value="电自">电自</option><option value="电摩">电摩</option><option value="电轻摩">电轻摩</option></select></div>
             </div>
             <div class="form-row">
                 <div class="form-group"><label>售价（元）</label><input type="number" id="editPrice" required></div>
@@ -828,7 +828,7 @@
                 <div class="form-group"><label>其他配置</label><input type="text" id="editOtherFeatures" placeholder="如：USB充电口"></div>
             </div>
             <div class="form-group full"><label>核心卖点</label><textarea id="editHighlights" rows="2"></textarea></div>
-            <div class="form-group full"><label>图片链接</label><input type="text" id="editImage" placeholder="https://用户名.github.io/仓库名/images/1.png 或直接写 1.png" /><div id="editImgPreview" style="margin-top:8px;display:none;"><img id="editImgPreviewImg" src="" alt="预览" style="max-width:200px;max-height:150px;border-radius:6px;border:1px solid #ddd;" /></div></div>
+            <div class="form-group full"><label>图片链接</label><input type="text" id="editImage" placeholder="https://raw.githubusercontent.com/用户名/仓库名/images/1.png 或直接写 1.png" /><div id="editImgPreview" style="margin-top:8px;display:none;"><img id="editImgPreviewImg" src="" alt="预览" style="max-width:200px;max-height:150px;border-radius:6px;border:1px solid #ddd;" /></div></div>
             <div class="modal-actions">
                 <button type="button" class="cancel-btn" onclick="closeEditModal()">取消</button>
                 <button type="submit" class="save-btn">保存修改</button>
@@ -855,7 +855,7 @@
             4. 粘贴到下方输入框（token 仅保存在你本地浏览器中）<br>
             <br>
             <strong>图片说明：</strong>新增/编辑车型时，在「图片链接」字段填写图片URL即可。支持填写完整URL（如 https://.../images/1.png）或仅文件名（如 1.png，会自动拼接设置中的图片基础路径）。<br>
-            <strong>图片基础路径：</strong>如果你的图片存放在 GitHub Pages（如 https://用户名.github.io/仓库名/images/），在此填写该路径，表单中只需填文件名即可。
+            <strong>图片基础路径：</strong>默认已配置好你的仓库路径。你也可以在此修改为其他图床路径（如 https://raw.githubusercontent.com/你的用户名/你的仓库名/images/），表单中只需填文件名即可。
         </div>
         <div class="form-row">
             <div class="form-group"><label>GitHub 用户名</label><input type="text" id="settingOwner" placeholder="如：zhangsan"></div>
@@ -867,11 +867,12 @@
         </div>
         <div class="form-group full" style="margin-bottom:12px">
             <label>图片基础路径</label>
-            <input type="text" id="settingImgBase" placeholder="https://用户名.github.io/仓库名/images/" />
-            <small style="font-size:0.72rem;color:var(--text-light);display:block;margin-top:4px;">配置后，表单中只需填写文件名（如 1.png），会自动拼接此路径。留空则图片字段需填完整URL。</small>
+            <input type="text" id="settingImgBase" placeholder="https://raw.githubusercontent.com/ydd0310/Electric-two-wheeler-yddver./images/" />
+            <small style="font-size:0.72rem;color:var(--text-light);display:block;margin-top:4px;">默认已填好你的仓库路径，一般不用改。配置后表单中只需填文件名（如 fz160.png），会自动拼接。留空则需填完整URL。</small>
         </div>
         <div class="test-result" id="testResult"></div>
         <div class="modal-actions">
+
             <button type="button" class="cancel-btn" onclick="closeSettingsModal()">取消</button>
             <button type="button" class="save-btn" onclick="testConnection()" style="background:#f0f0f0;color:var(--text)">测试连接</button>
             <button type="button" class="save-btn" onclick="saveSettings()">保存</button>
@@ -908,7 +909,7 @@ function saveGhConfig() {
 }
 
 // ==================== 图片配置（URL填写方案）====================
-const DEFAULT_IMG_BASE = 'https://YOUR_USERNAME.github.io/YOUR_REPO/images/';
+const DEFAULT_IMG_BASE = 'https://raw.githubusercontent.com/ydd0310/Electric-two-wheeler-yddver./images/';
 
 function getImgBase() {
     return localStorage.getItem('img_base') || DEFAULT_IMG_BASE;
@@ -929,7 +930,19 @@ function setImgBase(v) {
 function resolveImage(val) {
     if (!val || val === '-' || val.trim() === '') return '';
     val = val.trim();
+    // 如果是 GitHub 链接（blob 或 tree），自动转成 raw 直链
+    if (val.includes('github.com')) {
+        // 替换 github.com/ 为 raw.githubusercontent.com/
+        val = val.replace('github.com', 'raw.githubusercontent.com');
+        // 去掉 /blob/ 段（raw 不需要）
+        val = val.replace('/blob/', '/');
+        // 去掉 /tree/ 段
+        val = val.replace('/tree/', '/');
+        return val;
+    }
+    // 已经是其他 http(s) 链接，原样返回
     if (/^https?:\/\//i.test(val)) return val;
+    // 只是文件名，自动拼接基础路径
     return getImgBase() + encodeURIComponent(val);
 }
 
@@ -1010,7 +1023,7 @@ async function syncToGitHub(showMsg) {
             await ghSaveData(vehicles);
             updateSyncStatus('connected', '已同步');
             // 同时缓存到 localStorage
-            localStorage.setItem('vehicleDataCache', JSON.stringify(vehicles));
+            localStorage.setItem('vehicleDataCache', JSON.stringify(vehicles.map(v => ({...v, series: canonicalSeries(v.series)}))));
             if (showMsg) alert('✅ 数据已同步到 GitHub！');
         } catch(e) {
             updateSyncStatus('error', '同步失败');
@@ -1029,6 +1042,7 @@ function openSettingsModal() {
     document.getElementById('testResult').className = 'test-result';
     document.getElementById('testResult').textContent = '';
     document.getElementById('settingsModal').classList.add('active');
+    try { var el = document.getElementById('set_imgbase'); if(el) el.value = getImgBase(); } catch(e) {}
     document.body.style.overflow = 'hidden';
 }
 
@@ -1106,9 +1120,9 @@ async function saveSettings() {
         showLoading('正在从 GitHub 加载数据…');
         const data = await ghFetchData();
         if (data && data.length > 0) {
-            vehicles = normalizeVehiclesArray(data);
+            vehicles = canonicalizeVehicles(data);
             updateSyncStatus('connected', '已同步');
-            localStorage.setItem('vehicleDataCache', JSON.stringify(vehicles));
+            localStorage.setItem('vehicleDataCache', JSON.stringify(vehicles.map(v => ({...v, series: canonicalSeries(v.series)}))));
         }
         hideLoading();
         refreshSeriesFilters();
@@ -1119,7 +1133,7 @@ async function saveSettings() {
         updateSyncStatus('error', '加载失败');
         alert('⚠️ 设置已保存，但从 GitHub 加载数据失败: ' + e.message + '\n\n将使用本地缓存数据。');
         // 使用本地缓存作为后备
-        try { const cached = localStorage.getItem('vehicleDataCache'); if (cached) { vehicles = normalizeVehiclesArray(JSON.parse(cached)); } } catch(e2) { vehicles = normalizeVehiclesArray([...defaultVehicles]); }
+        try { const cached = localStorage.getItem('vehicleDataCache'); if (cached) { vehicles = canonicalizeVehicles(JSON.parse(cached)); } } catch(e2) { vehicles = canonicalizeVehicles([...defaultVehicles]); }
     }
 }
 
@@ -1184,7 +1198,7 @@ function openCompareModal() {
         { label: '销售定位', key: 'salesInfo', format: v => v.salesInfo || '-', raw: v => v.salesInfo },
         { label: '上市时间', key: 'launchDate', format: v => v.launchDate ? v.launchDate : '-', raw: v => v.launchDate },
     ];
-    const headerCols = list.map(v => `<th><div class="vehicle-head"><span class="v-brand">${v.brand} · ${v.series}系列</span>${v.name}<div class="v-price">${typeof v.price === 'number' ? '¥' + v.price.toLocaleString() : (v.price || '-')}</div></div></th>`).join('');
+    const headerCols = list.map(v => `<th><div class="vehicle-head"><span class="v-brand">${v.brand} · ${canonicalSeries(v.series)}系列</span>${v.name}<div class="v-price">${typeof v.price === 'number' ? '¥' + v.price.toLocaleString() : (v.price || '-')}</div></div></th>`).join('');
     const rows = params.map(p => {
         const rawVals = list.map(v => p.raw(v));
         const allSame = rawVals.every(val => val === rawVals[0]);
@@ -1200,62 +1214,95 @@ function openCompareModal() {
 function closeCompareModal() { document.getElementById('compareModal').classList.remove('active'); document.body.style.overflow = ''; }
 document.getElementById('compareModal').addEventListener('click', function(e) { if (e.target === this) closeCompareModal(); });
 
-// ==================== 系列管理 ====================
-let customSeries = [];
-
-// ==================== 系列名称归一化 ====================
-const SERIES_NORMALIZE = {
+// ==================== 数据模型 ====================
+// 系列是车型数据的属性，只保留一套数据源。
+// 数据层统一保存“系列基础名”，界面层只负责展示，不再重复追加“系列”。
+const SERIES_ALIASES = {
     // 极核 ZEEHO
-    'AE2': 'AE系列', 'AE3': 'AE系列', 'AE4': 'AE系列', 'AE5': 'AE系列',
-    'AE6': 'AE系列', 'AE7': 'AE系列', 'AE8': 'AE系列', 'AE ONE': 'AE系列',
-    'EZ3': 'EZ系列', 'EZ4': 'EZ系列',
-    'MO1': 'MO系列', 'MO2': 'MO系列', 'MO3': 'MO系列',
+    'AE2': 'AE', 'AE3': 'AE', 'AE4': 'AE', 'AE5': 'AE',
+    'AE6': 'AE', 'AE7': 'AE', 'AE8': 'AE', 'AE ONE': 'AE',
+    'EZ3': 'EZ', 'EZ4': 'EZ',
+    'MO1': 'MO', 'MO2': 'MO', 'MO3': 'MO',
     // 九号 Ninebot
-    'Fz': 'Fz系列', 'Fz5': 'Fz系列',
-    'A2': 'A系列',
-    'M 90': 'M系列', 'M1': 'M系列', 'M1 闪骑': 'M系列',
-    'M3': 'M系列', 'M3 MAX 闪骑': 'M系列', 'M3 闪骑': 'M系列',
-    'Mz1': 'Mz系列', 'Mz3': 'Mz系列', 'Mz3 闪骑': 'Mz系列',
-    'N1': 'N系列', 'N3 2026': 'N系列',
-    'Q3': 'Q系列', 'QL 家庭版': 'Q系列',
-    'Qz1': 'Qz系列', 'Qz3': 'Qz系列',
-    'V': 'V系列',
+    'Fz': 'Fz', 'Fz5': 'Fz',
+    'A2': 'A',
+    'M 90': 'M', 'M1': 'M', 'M1 闪骑': 'M',
+    'M3': 'M', 'M3 MAX 闪骑': 'M', 'M3 闪骑': 'M',
+    'Mz1': 'Mz', 'Mz3': 'Mz', 'Mz3 闪骑': 'Mz',
+    'N1': 'N', 'N3 2026': 'N',
+    'Q3': 'Q', 'QL 家庭版': 'Q',
+    'Qz1': 'Qz', 'Qz3': 'Qz',
+    'V': 'V',
     // 小牛 Niu
-    'FS': 'FS系列', 'FS风速': 'FS系列',
-    'FX 风速 Plus': 'FX系列',
-    'FXT 2026A': 'FXT系列',
-    'K': 'K系列',
-    'MMT 2026A': 'MMT系列',
-    'MT': 'MT系列',
-    'N ONE': 'N系列', 'N 风驰': 'N系列',
-    'NST 2026A': 'NST系列',
-    'NX 2026': 'NX系列', 'NX 马拉松': 'NX系列', 'NX风速': 'NX系列',
-    'NX 风速 Pro': 'NX系列',
-    'NXT 2026A': 'NX系列', 'NXT2': 'NX系列',
-    'O2 氧气': 'O2系列',
-    'U3': 'U系列',
-    'Y 芝士': 'Y系列', 'y果冻': 'Y系列',
+    'FS': 'FS', 'FS风速': 'FS',
+    'FX 风速 Plus': 'FX',
+    'FXT 2026A': 'FXT',
+    'K': 'K',
+    'MMT 2026A': 'MMT',
+    'MT': 'MT',
+    'N ONE': 'N', 'N 风驰': 'N',
+    'NST 2026A': 'NST',
+    'NX 2026': 'NX', 'NX 马拉松': 'NX', 'NX风速': 'NX',
+    'NX 风速 Pro': 'NX',
+    'NXT 2026A': 'NX', 'NXT2': 'NX',
+    'O2 氧气': 'O2',
+    'U3': 'U',
+    'Y 芝士': 'Y', 'y果冻': 'Y',
 };
 
-function normalizeSeries(rawSeries) {
-    if (!rawSeries) return '-';
-    return SERIES_NORMALIZE[rawSeries.trim()] || rawSeries.trim();
+const VEHICLE_TYPES = Object.freeze(['电自', '电摩', '电轻摩']);
+const TYPE_ALIASES = Object.freeze({
+    '电自': '电自',
+    '新国标电动自行车': '电自',
+    '电动自行车': '电自',
+    '电摩': '电摩',
+    '电动摩托车': '电摩',
+    '电轻摩': '电轻摩'
+});
+
+function canonicalSeries(rawSeries) {
+    if (rawSeries == null) return '';
+    let series = String(rawSeries).trim();
+    if (!series) return '';
+    // 兼容历史数据：系列名称在数据层只保留基础名。
+    while (series.endsWith('系列')) {
+        series = series.slice(0, -2).trim();
+    }
+    return SERIES_ALIASES[series] || series;
 }
 
-function normalizeVehiclesArray(vehicles) {
-    vehicles.forEach(v => {
-        if (v.series) {
-            v.series = normalizeSeries(v.series);
-        }
-    });
-    return vehicles;
+function canonicalType(rawType) {
+    const type = String(rawType || '').trim();
+    return TYPE_ALIASES[type] || '电自';
 }
 
-function getAllSeries() {
-    const seriesSet = new Set();
-    vehicles.forEach(v => seriesSet.add(v.series));
-    customSeries.forEach(s => seriesSet.add(s));
-    return Array.from(seriesSet).sort();
+function canonicalizeVehicle(vehicle) {
+    return {
+        ...vehicle,
+        series: canonicalSeries(vehicle.series),
+        type: canonicalType(vehicle.type)
+    };
+}
+
+function canonicalizeVehicles(data) {
+    return Array.isArray(data) ? data.map(canonicalizeVehicle) : [];
+}
+
+function getSeriesOptions(brand = 'all') {
+    const source = brand === 'all'
+        ? vehicles
+        : vehicles.filter(v => v.brand === brand);
+
+    return [...new Set(
+        source.map(v => canonicalSeries(v.series)).filter(Boolean)
+    )].sort((a, b) => a.localeCompare(b, 'zh-CN'));
+}
+
+function getSeriesOptionsHtml(brand = 'all', selected = '') {
+    const options = getSeriesOptions(brand);
+    return options.map(series =>
+        `<option value="${series}" ${series === selected ? 'selected' : ''}>${series}</option>`
+    ).join('');
 }
 
 // 品牌颜色映射
@@ -1314,18 +1361,31 @@ function updateStats() {
 function refreshSeriesFilters() {
     refreshBrandFilter();
     populateBrandDatalists();
-    const allSeries = getAllSeries();
+
+    const selectedBrand = document.getElementById('brandFilter').value;
+    const currentSeries = document.getElementById('seriesFilter').value;
     const seriesFilter = document.getElementById('seriesFilter');
-    const currentVal = seriesFilter.value;
-    seriesFilter.innerHTML = '<option value="all">全部系列</option>' + allSeries.map(s => `<option value="${s}">${s} 系列</option>`).join('');
-    seriesFilter.value = allSeries.includes(currentVal) ? currentVal : 'all';
+    const filterSeries = getSeriesOptions(selectedBrand);
+
+    seriesFilter.innerHTML =
+        '<option value="all">全部系列</option>' +
+        filterSeries.map(series => `<option value="${series}">${series}</option>`).join('');
+
+    seriesFilter.value = filterSeries.includes(currentSeries) ? currentSeries : 'all';
+
+    refreshAddSeriesOptions();
+} 
+
+function refreshAddSeriesOptions() {
     const addSeries = document.getElementById('addSeries');
-    const selectedBrand = document.getElementById('addBrand').value;
-    let brandSeries = allSeries;
-    if (selectedBrand) {
-        brandSeries = [...new Set(vehicles.filter(v => v.brand === selectedBrand).map(v => v.series))];
-    }
-    addSeries.innerHTML = brandSeries.map(s => `<option value="${s}">${s} 系列</option>`).join('');
+    if (!addSeries) return;
+
+    const selectedBrand = document.getElementById('addBrand').value.trim();
+    const options = getSeriesOptions(selectedBrand || 'all');
+
+    addSeries.innerHTML =
+        '<option value="">请选择系列</option>' +
+        options.map(series => `<option value="${series}">${series}</option>`).join('');
 }
 
 // 动态填充品牌自动完成列表（添加/编辑表单）
@@ -1362,9 +1422,9 @@ function getFilteredVehicles() {
     const search = document.getElementById('searchInput').value.toLowerCase();
     return vehicles.filter(v => {
         if (brand !== 'all' && v.brand !== brand) return false;
-        if (series !== 'all' && v.series !== series) return false;
+        if (series !== 'all' && canonicalSeries(v.series) !== series) return false;
         if (type !== 'all' && v.type !== type) return false;
-        if (search && !v.name.toLowerCase().includes(search) && !v.series.toLowerCase().includes(search)) return false;
+        if (search && !v.name.toLowerCase().includes(search) && !canonicalSeries(v.series).toLowerCase().includes(search)) return false;
         if (price === '0-3000' && v.price >= 3000) return false;
         if (price === '3000-4000' && (v.price < 3000 || v.price >= 4000)) return false;
         if (price === '4000-5000' && (v.price < 4000 || v.price >= 5000)) return false;
@@ -1375,37 +1435,44 @@ function getFilteredVehicles() {
 }
 
 
-// 品牌选择变化时，联动更新系列下拉框
+// 品牌变化只负责刷新系列选项；系列数据源始终来自车型数据。
 document.getElementById('brandFilter').addEventListener('change', function() {
-    const selectedBrand = this.value;
-    const seriesFilter = document.getElementById('seriesFilter');
-    
-    // 清空系列选项
-    seriesFilter.innerHTML = '<option value="all">全部系列</option>';
-    
-    if (selectedBrand && selectedBrand !== 'all') {
-        // 只显示该品牌下的系列
-        const seriesList = [...new Set(
-            vehicles.filter(v => v.brand === selectedBrand).map(v => v.series)
-        )].sort();
-        seriesList.forEach(s => {
-            seriesFilter.innerHTML += '<option value="' + s + '">' + s + ' 系列</option>';
-        });
-    } else {
-        // 全部品牌时显示所有系列
-        const allSeries = getAllSeries();
-        allSeries.forEach(s => {
-            seriesFilter.innerHTML += '<option value="' + s + '">' + s + ' 系列</option>';
-        });
-    }
-    
-    // 重置系列筛选为"全部"
-    seriesFilter.value = 'all';
-    
-    // 重新渲染
+    refreshSeriesFilters();
     renderVehicles();
 });
 
+// ==================== 表单图片预览 ====================
+(function bindFormImagePreviews() {
+    const addImgInput = document.getElementById('addImage');
+    const addPreviewBox = document.getElementById('addImgPreview');
+    const addPreviewImg = document.getElementById('addImgPreviewImg');
+    const editImgInput = document.getElementById('editImage');
+    const editPreviewBox = document.getElementById('editImgPreview');
+    const editPreviewImg = document.getElementById('editImgPreviewImg');
+
+    function bindPreview(inputEl, previewBoxEl, previewImgEl) {
+        if (!inputEl || !previewBoxEl || !previewImgEl) return;
+        inputEl.addEventListener('input', function() {
+            const raw = this.value.trim();
+            if (raw) {
+                const url = resolveImage(raw);
+                if (url) {
+                    previewImgEl.src = url;
+                    previewBoxEl.style.display = 'block';
+                } else {
+                    previewBoxEl.style.display = 'none';
+                    previewImgEl.src = '';
+                }
+            } else {
+                previewBoxEl.style.display = 'none';
+                previewImgEl.src = '';
+            }
+        });
+    }
+
+    bindPreview(addImgInput, addPreviewBox, addPreviewImg);
+    bindPreview(editImgInput, editPreviewBox, editPreviewImg);
+})();
 function renderVehicles() {
     let filtered = getFilteredVehicles();
     filtered = sortVehicles(filtered);
@@ -1422,7 +1489,7 @@ function renderVehicles() {
                     <div class="card-img-hint">点击查看详细配置</div>
                 </div>
                 <div class="card-header">
-                    <div class="card-brand-row"><span class="card-brand" style="color:${getBrandColor(v.brand)}">${v.brand}</span><span class="card-series-tag">${v.series}系列</span></div>
+                    <div class="card-brand-row"><span class="card-brand" style="color:${getBrandColor(v.brand)}">${v.brand}</span><span class="card-series-tag">${canonicalSeries(v.series)}系列</span></div>
                     <div class="card-name">${v.name}</div>
                     <div class="card-price">${typeof v.price === 'number' ? '¥' + v.price.toLocaleString() : (v.price || '-')}</div>
                 </div>
@@ -1460,6 +1527,12 @@ function renderVehicles() {
             }
         }
     });
+    // 兜底：修复DOM中可能残留的"系列系列"文本
+    document.querySelectorAll('.card-series-tag').forEach(el => {
+        if (/系列\s*系列/.test(el.textContent)) {
+            el.textContent = el.textContent.replace(/(系列)(\s*系列)+/g, '$1');
+        }
+    });
     updateStats();
 }
 
@@ -1495,7 +1568,7 @@ function openDetailModal(id) {
 
     // === Header ===
     html += '<div class="detail-header">';
-    html += '<div class="detail-brand">' + (v.brand || '-') + ' · ' + (v.series || '-') + '系列 · ' + (v.type || '-') + '</div>';
+    html += '<div class="detail-brand">' + (v.brand || '-') + ' · ' + (canonicalSeries(v.series) || '-') + '系列 · ' + (v.type || '-') + '</div>';
     html += '<div class="detail-name">' + (v.name || '-') + '</div>';
     html += '<div class="detail-price">' + (typeof v.price === "number" ? "¥" + v.price.toLocaleString() : (v.price || "-")) + '</div>';
     if (v.launchDate && v.launchDate !== "-") {
@@ -1667,7 +1740,7 @@ function openEditModal(id) {
     document.getElementById('editSubtitle').textContent = `正在编辑：${v.brand} ${v.name}`;
     const editSeries = document.getElementById('editSeries');
     const brandSeries = [...new Set(vehicles.filter(vv => vv.brand === v.brand).map(vv => vv.series))];
-    editSeries.innerHTML = brandSeries.map(s => `<option value="${s}" ${s === v.series ? 'selected' : ''}>${s} 系列</option>`).join('');
+    editSeries.innerHTML = brandSeries.map(s => `<option value="${canonicalSeries(s)}" ${canonicalSeries(s) === canonicalSeries(v.series) ? 'selected' : ''}>${canonicalSeries(s)}</option>`).join('');
     
     // 初始化编辑图片预览
     const editImageInput = document.getElementById('editImage');
@@ -1700,8 +1773,8 @@ document.getElementById('editForm').addEventListener('submit', async function(e)
     if (!v) return;
     v.brand = document.getElementById('editBrand').value;
     v.name = document.getElementById('editName').value;
-    v.series = document.getElementById('editSeries').value;
-    v.type = document.getElementById('editType').value;
+    v.series = canonicalSeries(document.getElementById('editSeries').value);
+    v.type = canonicalType(document.getElementById('editType').value);
     v.price = parseInt(document.getElementById('editPrice').value);
     v.ratedPower = parseInt(document.getElementById('editRatedPower').value) || null;
     v.peakPower = parseInt(document.getElementById('editPeakPower').value) || null;
@@ -1784,16 +1857,20 @@ document.querySelectorAll('.sort-btn').forEach(btn => {
 });
 
 document.getElementById('addNewSeriesBtn').addEventListener('click', function() {
-    const name = prompt('请输入新系列名称（如：MO、NS、FZ 等英文缩写）：');
-    if (name && name.trim()) {
-        const seriesName = name.trim().toUpperCase();
-        if (!customSeries.includes(seriesName) && !getAllSeries().includes(seriesName)) {
-            customSeries.push(seriesName);
-            refreshSeriesFilters();
-            document.getElementById('addSeries').value = seriesName;
-            alert(`新系列「${seriesName}」已添加成功！`);
-        } else { alert(`系列「${seriesName}」已存在！`); }
+    const name = prompt('请输入新系列名称（如：MO、NS、FZ）：');
+    const series = canonicalSeries(name);
+    if (!series) return;
+
+    const existing = getSeriesOptions(document.getElementById('addBrand').value.trim() || 'all');
+    if (existing.includes(series)) {
+        document.getElementById('addSeries').value = series;
+        alert(`系列「${series}」已存在，已为你选中。`);
+        return;
     }
+
+    const addSeries = document.getElementById('addSeries');
+    addSeries.innerHTML += `<option value="${series}">${series}</option>`;
+    addSeries.value = series;
 });
 
 // 新增表单图片URL实时预览
@@ -1819,7 +1896,7 @@ document.getElementById('addForm').addEventListener('submit', async function(e) 
     const newVehicle = {
         id: newId,
         brand: document.getElementById('addBrand').value,
-        series: document.getElementById('addSeries').value,
+        series: canonicalSeries(document.getElementById('addSeries').value),
         name: document.getElementById('addName').value,
         price: parseInt(document.getElementById('addPrice').value),
         type: document.getElementById('addType').value,
@@ -1869,7 +1946,7 @@ document.getElementById('addForm').addEventListener('submit', async function(e) 
 
         image: document.getElementById('addImage') ? document.getElementById('addImage').value.trim() : ''
     };
-    vehicles.push(newVehicle);
+    vehicles.push(canonicalizeVehicle(newVehicle));
     refreshSeriesFilters();
     // 清空图片URL和预览
     const addImgP = document.getElementById('addImgPreview');
@@ -1894,31 +1971,31 @@ async function init() {
             updateSyncStatus('syncing', '加载中…');
             const data = await ghFetchData();
             if (data && data.length > 0) {
-                vehicles = normalizeVehiclesArray(data);
+                vehicles = canonicalizeVehicles(data);
                 updateSyncStatus('connected', '已同步');
             } else {
-                vehicles = normalizeVehiclesArray([...defaultVehicles]);
+                vehicles = canonicalizeVehicles([...defaultVehicles]);
                 updateSyncStatus('connected', '已加载默认数据');
             }
             // 缓存到 localStorage
-            localStorage.setItem('vehicleDataCache', JSON.stringify(vehicles));
+            localStorage.setItem('vehicleDataCache', JSON.stringify(vehicles.map(v => ({...v, series: canonicalSeries(v.series)}))));
         } catch(e) {
             console.warn('GitHub 加载失败，使用本地缓存', e);
             updateSyncStatus('error', '离线模式');
             // 尝试从 localStorage 缓存加载
             try {
                 const cached = localStorage.getItem('vehicleDataCache');
-                if (cached) { vehicles = normalizeVehiclesArray(JSON.parse(cached)); normalizeVehiclesArray(vehicles); }
-                else { vehicles = normalizeVehiclesArray([...defaultVehicles]); }
-            } catch(e2) { vehicles = normalizeVehiclesArray([...defaultVehicles]); }
+                if (cached) { vehicles = canonicalizeVehicles(JSON.parse(cached)); }
+                else { vehicles = canonicalizeVehicles([...defaultVehicles]); }
+            } catch(e2) { vehicles = canonicalizeVehicles([...defaultVehicles]); }
         }
     } else {
         // 没有配置 GitHub，使用默认数据
         try {
             const cached = localStorage.getItem('vehicleDataCache');
-            if (cached) { vehicles = normalizeVehiclesArray(JSON.parse(cached)); updateSyncStatus('offline', '本地模式'); }
-            else { vehicles = normalizeVehiclesArray([...defaultVehicles]); updateSyncStatus('offline', '未配置'); }
-        } catch(e) { vehicles = normalizeVehiclesArray([...defaultVehicles]); updateSyncStatus('offline', '未配置'); }
+            if (cached) { vehicles = canonicalizeVehicles(JSON.parse(cached)); updateSyncStatus('offline', '本地模式'); }
+            else { vehicles = canonicalizeVehicles([...defaultVehicles]); updateSyncStatus('offline', '未配置'); }
+        } catch(e) { vehicles = canonicalizeVehicles([...defaultVehicles]); updateSyncStatus('offline', '未配置'); }
         // 首次使用，弹出设置提示
         setTimeout(() => {
             if (confirm('👋 欢迎使用！\n\n检测到尚未配置 GitHub 同步。\n\n是否现在配置？配置后数据将自动同步到云端，支持多人协作。\n\n（也可以稍后点击右上角「设置」按钮配置）')) {
@@ -1929,30 +2006,23 @@ async function init() {
 
     // 添加表单品牌变化时联动系列
     document.getElementById('addBrand').addEventListener('input', function() {
-        const selectedBrand = this.value.trim();
-        const addSeries = document.getElementById('addSeries');
-        const allSeries = getAllSeries();
-        let brandSeries = allSeries;
-        if (selectedBrand) {
-            brandSeries = [...new Set(vehicles.filter(v => v.brand === selectedBrand).map(v => v.series))];
-        }
-        addSeries.innerHTML = brandSeries.map(s => `<option value="${s}">${s} 系列</option>`).join('');
-        addSeries.value = '';
+        refreshAddSeriesOptions();
     });
     
     // 编辑表单品牌变化时联动系列
     document.getElementById('editBrand').addEventListener('input', function() {
         const selectedBrand = this.value.trim();
         const editSeries = document.getElementById('editSeries');
-        const allSeries = getAllSeries();
-        let brandSeries = allSeries;
-        if (selectedBrand) {
-            brandSeries = [...new Set(vehicles.filter(v => v.brand === selectedBrand).map(v => v.series))];
-        }
-        editSeries.innerHTML = brandSeries.map(s => `<option value="${s}">${s} 系列</option>`).join('');
+        const currentSeries = canonicalSeries(editSeries.value);
+        const options = getSeriesOptions(selectedBrand || 'all');
+
+        editSeries.innerHTML = options.map(series =>
+            `<option value="${series}" ${series === currentSeries ? 'selected' : ''}>${series}</option>`
+        ).join('');
     });
+    // 数据进入应用状态前统一归一化一次，之后所有模块直接使用 canonical 数据。
+    vehicles = canonicalizeVehicles(vehicles);
     refreshSeriesFilters();
-    normalizeVehiclesArray(vehicles);
     renderVehicles();
 }
 
