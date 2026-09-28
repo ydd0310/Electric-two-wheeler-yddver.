@@ -848,14 +848,7 @@
         <h2>⚙️ GitHub 同步设置</h2>
         <p class="modal-subtitle">配置 GitHub 仓库信息，实现多人云端数据同步</p>
         <div class="tip-box">
-            <strong>如何获取 Personal Access Token？</strong><br>
-            1. 打开 <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a><br>
-            2. 点击 <code>Generate new token (classic)</code><br>
-            3. 勾选 <code>repo</code> 权限（Full control of private repositories）→ 生成并复制 token<br>
-            4. 粘贴到下方输入框（token 仅保存在你本地浏览器中）<br>
-            <br>
             <strong>图片说明：</strong>新增/编辑车型时，在「图片链接」字段填写图片URL即可。支持填写完整URL（如 https://.../images/1.png）或仅文件名（如 1.png，会自动拼接设置中的图片基础路径）。<br>
-            <strong>图片基础路径：</strong>默认已配置好你的仓库路径。你也可以在此修改为其他图床路径（如 https://raw.githubusercontent.com/你的用户名/你的仓库名/images/），表单中只需填文件名即可。
         </div>
         <div class="form-row">
             <div class="form-group"><label>GitHub 用户名</label><input type="text" id="settingOwner" placeholder="如：zhangsan"></div>
@@ -868,7 +861,7 @@
         <div class="form-group full" style="margin-bottom:12px">
             <label>图片基础路径</label>
             <input type="text" id="settingImgBase" placeholder="https://raw.githubusercontent.com/ydd0310/Electric-two-wheeler-yddver./images/" />
-            <small style="font-size:0.72rem;color:var(--text-light);display:block;margin-top:4px;">默认已填好你的仓库路径，一般不用改。配置后表单中只需填文件名（如 fz160.png），会自动拼接。留空则需填完整URL。</small>
+            <small style="font-size:0.72rem;color:var(--text-light);display:block;margin-top:4px;">默认已填好ydd的仓库路径，不要修改。</small>
         </div>
         <div class="test-result" id="testResult"></div>
         <div class="modal-actions">
