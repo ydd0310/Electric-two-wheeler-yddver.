@@ -1254,7 +1254,7 @@ const SERIES_NORMALIZE = {
 function normalizeSeries(rawSeries) {
     if (!rawSeries) return '-';
     const result = SERIES_NORMALIZE[rawSeries.trim()] || rawSeries.trim();
-    // 使用 normSeries 确保彻底去掉"系列"
+    // 归一化系列名称
     return normSeries(result);
 }
 
@@ -1266,11 +1266,11 @@ function normalizeVehiclesArray(vehicles) {
     });
     return vehicles;
 }
-// 去除系列名末尾多余的"系列"二字（防止数据显示为 "fz系列系列"）
+// 去除系列名末尾的"系列"后缀
 function normSeries(s) {
     if (s == null) return '';
     s = String(s).trim();
-    // 循环去掉末尾所有"系列"，防止 "AE系列系列" -> "AE"
+    // 循环去除末尾所有"系列"后缀
     while (/系列$/.test(s)) s = s.slice(0, -2).trim();
     return s;
 }
@@ -1279,7 +1279,7 @@ function normSeries(s) {
 function getAllSeries() {
     const seriesSet = new Set();
     vehicles.forEach(v => {
-        // 用 normSeries 确保返回值干净，防止脏数据导致显示异常
+        // 确保返回值干净
         const s = normSeries(v.series);
         if (s) seriesSet.add(s);
     });
@@ -1350,9 +1350,7 @@ function refreshSeriesFilters() {
     const seriesFilter = document.getElementById('seriesFilter');
     const currentVal = seriesFilter.value;
     seriesFilter.innerHTML = '<option value="all">全部系列</option>' + allSeries.map(s => `<option value="${normSeries(s)}">${normSeries(s)} 系列</option>`).join('');
-    // 清洗当前选中值后匹配（防止旧缓存数据导致匹配失败）
-    const cleanedCurrentVal = normSeries(currentVal);
-    seriesFilter.value = allSeries.includes(cleanedCurrentVal) ? cleanedCurrentVal : 'all';
+    seriesFilter.value = allSeries.includes(currentVal) ? currentVal : 'all';
     const addSeries = document.getElementById('addSeries');
     const selectedBrand = document.getElementById('addBrand').value;
     let brandSeries = allSeries;
@@ -1526,12 +1524,7 @@ function renderVehicles() {
             }
         }
     });
-    // 兜底：修复DOM中可能残留的"系列系列"文本
-    document.querySelectorAll('.card-series-tag').forEach(el => {
-        if (/系列\s*系列/.test(el.textContent)) {
-            el.textContent = el.textContent.replace(/(系列)(\s*系列)+/g, '$1');
-        }
-    });
+
     updateStats();
 }
 
@@ -1861,7 +1854,7 @@ document.getElementById('addNewSeriesBtn').addEventListener('click', function() 
         const seriesName = name.trim().toUpperCase();
         const cleanedSeriesName = normSeries(seriesName);
         if (!customSeries.includes(cleanedSeriesName) && !getAllSeries().includes(cleanedSeriesName)) {
-            customSeries = customSeries.map(s => normSeries(s)); // 清洗旧数据
+
             customSeries.push(cleanedSeriesName);
             refreshSeriesFilters();
             document.getElementById('addSeries').value = cleanedSeriesName;
@@ -1982,7 +1975,7 @@ async function init() {
             // 尝试从 localStorage 缓存加载
             try {
                 const cached = localStorage.getItem('vehicleDataCache');
-                if (cached) { vehicles = normalizeVehiclesArray(JSON.parse(cached)); normalizeVehiclesArray(vehicles); }
+                if (cached) { vehicles = normalizeVehiclesArray(JSON.parse(cached)); }
                 else { vehicles = normalizeVehiclesArray([...defaultVehicles]); }
             } catch(e2) { vehicles = normalizeVehiclesArray([...defaultVehicles]); }
         }
@@ -2025,7 +2018,7 @@ async function init() {
         }
         editSeries.innerHTML = brandSeries.map(s => `<option value="${normSeries(s)}">${normSeries(s)} 系列</option>`).join('');
     });
-    // 先清洗数据，再构建UI（防止系列名带"系列"导致显示"XX系列 系列"）
+    // 清洗数据并构建UI
     normalizeVehiclesArray(vehicles);
     refreshSeriesFilters();
     renderVehicles();
